@@ -17,6 +17,9 @@
 #include <time.h>
 #include <Windows.h>
 
+#include <Xinput.h>
+#pragma comment(lib, "XInput.lib")
+
 // includeing files
 #include "defines.h"
 
@@ -29,6 +32,20 @@ public:
 	unsigned int monster_a1;
 	unsigned int monster_b1;
 };
+
+// controller class
+class XboxController {
+private:
+	XINPUT_STATE conState;
+public:
+	int conNum;
+	XboxController(int f_playerNum);
+	XINPUT_STATE getState();
+	bool connected();
+	void vibrate(int f_L_val, int f_R_val);
+};
+
+void delete_con();
 
 /* --- std func --- */
 
@@ -160,6 +177,8 @@ unsigned int HID_store();
 unsigned int HID_load();
 
 unsigned int HID_save();
+
+unsigned int HID_controller();
 
 /* --- read HID --- */
 

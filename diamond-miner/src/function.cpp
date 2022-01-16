@@ -18,7 +18,14 @@ coordinate y;
 // file management
 FILE * fp;
 
+// controller object
+XboxController * controller1;
+
 /* --- variables --- */
+
+// controller enable
+bool con_en;
+bool con_delay_en;
 
 // save data
 unsigned int save_data[save_elements];
@@ -225,6 +232,46 @@ unsigned char pic_[3][3] = {
 
 /* --- functions --- */
 
+// functions of controller class
+XboxController::XboxController(int f_playerNum) {
+	conNum = f_playerNum - 1;
+}
+
+XINPUT_STATE XboxController::getState() {
+
+	ZeroMemory(&conState, sizeof(XINPUT_STATE));
+
+	XInputGetState(conNum, &conState);
+
+	return conState;
+}
+
+bool XboxController::connected() {
+
+	ZeroMemory(&conState, sizeof(XINPUT_STATE));
+
+	DWORD f_result = XInputGetState(conNum, &conState);
+
+	if (f_result == ERROR_SUCCESS) return 1;
+	else return 0;
+}
+
+void XboxController::vibrate(int f_L_val, int f_R_val) {
+
+	XINPUT_VIBRATION vibration;
+
+	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
+
+	vibration.wLeftMotorSpeed = f_L_val;
+	vibration.wRightMotorSpeed = f_R_val;
+
+	XInputSetState(conNum, &vibration);
+}
+
+void delete_con() {
+
+	delete(controller1);
+}
 
 /* --- std func --- */
 
@@ -800,6 +847,8 @@ unsigned int print_border() {
 // set values to default
 unsigned int set_default() {
 
+	controller1 = new XboxController(1);
+
 	// turn off cursor
 	set_cursor(0, cursor_hight);
 
@@ -944,6 +993,8 @@ unsigned int create_field() {
 // start
 unsigned int page_start() {
 
+	unsigned char f_but = 0;
+
 	clr_scr;
 
 	print_pic_diamond_text(4, 1);
@@ -953,10 +1004,26 @@ unsigned int page_start() {
 
 	print_pic_monster_big(35, 10);
 
-	printxy("Press Enter to start", 4, 21);
+	printxy("Press Enter to start in keyboard mode", 4, 21);
+	printxy("Press Space to start in controller mode", 4, 23);
 
 	clr_kbbuf;
-	wait_kb;
+	
+	f_but = _getch();
+
+	switch (f_but) {
+
+	case but_kb_mode:
+		con_en = 0;
+		break;
+
+	case but_con_mode:
+		con_en = 1;
+		break;
+
+	default:
+		break;
+	}
 
 	clr_scr;
 
@@ -977,7 +1044,8 @@ unsigned int page_game() {
 
 		print_border();
 
-		printxy("Press Esc to view menu", dialog_x0 + 1, dialog_y0 + 1);
+		if(con_en) printxy("Press start to view menu", dialog_x0 + 1, dialog_y0 + 1);
+		else printxy("Press Esc to view menu", dialog_x0 + 1, dialog_y0 + 1);
 
 		gotoxy(dialog_x0 + 1, dialog_y0 + dialog_hight - 4);
 		printf("Actual file: %s", save_file_name);
@@ -1067,17 +1135,16 @@ unsigned int page_about() {
 	gotoxy(dialog_x0 + 1, dialog_y0 + 1);
 	printf("Diamond Miner %s", release_version);
 
-	printxy("Move with arrow keys or WASD. Use TNT", dialog_x0 + 1, dialog_y0 + 3);
-	printxy("with Space and C4 with C. Enter the", dialog_x0 + 1, dialog_y0 + 4);
-	printxy("store with Enter. View map with M.", dialog_x0 + 1, dialog_y0 + 5);
+	printxy("Controlls:", dialog_x0 + 1, dialog_y0 + 3);
+	printxy("move  WASD   stick l", dialog_x0 + 1, dialog_y0 + 4);
+	printxy("move  arrows DPAD", dialog_x0 + 1, dialog_y0 + 5);
+	printxy("TNT   Space  X", dialog_x0 + 1, dialog_y0 + 6);
+	printxy("C4    C      B", dialog_x0 + 1, dialog_y0 + 7);
+	printxy("map   M      Y", dialog_x0 + 1, dialog_y0 + 8);
+	printxy("store Enter  A", dialog_x0 + 1, dialog_y0 + 9);
 
-	printxy("If you find all diamonds, you will", dialog_x0 + 1, dialog_y0 + 7);
-	printxy("win one C4.", dialog_x0 + 1, dialog_y0 + 8);
-
-	printxy("Programmed in C++", dialog_x0 + 1, dialog_y0 + 12);
-	printxy("Sep. - Nov. 2015", dialog_x0 + 1, dialog_y0 + 13);
-
-	//printxy("", dialog_x0 + 1, dialog_y0 + 0);
+	printxy("If you find all diamonds, you will", dialog_x0 + 1, dialog_y0 + 12);
+	printxy("win one C4.", dialog_x0 + 1, dialog_y0 + 13);
 
 	printxy("Return with Esc", dialog_x0 + 1, dialog_y0 + dialog_hight - 1);
 
@@ -1155,6 +1222,10 @@ unsigned int page_map() {
 			if (field[x.draw][y.draw] == c_miner) printf("%c", c_miner);
 			else printf("%c", c_to_dig);
 		}
+	}
+
+	for (y.draw = 0; y.draw < field_hight; y.draw++) {
+		printxy(" ", x.draw + 5, y.draw + 1);
 	}
 
 	return 0;
@@ -1276,6 +1347,14 @@ unsigned int print() {
 		error(err_print);
 		break;
 	}
+
+	// for better move feeling
+	if (con_en) {
+		Sleep(print_delay);
+		if (con_delay_en) Sleep(con_delay);
+	}
+
+	else Sleep(print_delay);
 
 	return 0;
 }
@@ -1413,17 +1492,63 @@ unsigned int HID_save() {
 	return 0;
 }
 
+unsigned int HID_controller() {
+
+	con_delay_en = 0;
+
+	while (1) {
+
+		// stick
+		if (controller1->getState().Gamepad.sThumbLY > con_stick_th) return but_up;
+		if (controller1->getState().Gamepad.sThumbLY < con_stick_th_) return but_down;
+		if (controller1->getState().Gamepad.sThumbLX > con_stick_th) return but_right;
+		if (controller1->getState().Gamepad.sThumbLX < con_stick_th_) return but_left;
+
+		// buttons
+		if (controller1->getState().Gamepad.wButtons & con_menu) return but_menu;
+		if (controller1->getState().Gamepad.wButtons & con_store) return but_store;
+		if (controller1->getState().Gamepad.wButtons & con_C4) return but_C4;
+		if (controller1->getState().Gamepad.wButtons & con_TNT) return but_TNT;
+		if (controller1->getState().Gamepad.wButtons & con_map) return but_map;
+
+		if (controller1->getState().Gamepad.wButtons & con_up) {
+			con_delay_en = 1;
+			return but_up;
+		}
+
+		if (controller1->getState().Gamepad.wButtons & con_down) {
+			con_delay_en = 1;
+			return but_down;
+		}
+
+		if (controller1->getState().Gamepad.wButtons & con_right) {
+			con_delay_en = 1;
+			return but_right;
+		}
+
+		if (controller1->getState().Gamepad.wButtons & con_left) {
+			con_delay_en = 1;
+			return but_left;
+		}
+
+
+	}
+
+	return 0;
+}
+
 /* --- read HID --- */
 
 // read HID
 unsigned int read_HID() {
 
 	// read kbbutton
-
 	clr_kbbuf;
-	if (page != 'save' && page != 'load')
-		kbbut = _getch();
-	
+	if (page != 'save' && page != 'load') {
+		if (con_en && (page == 'game' || page == 'map')) kbbut = HID_controller();
+		else kbbut = _getch();
+	}
+
 	if (page != 'game') print_once_game = 1;
 
 	switch (page) {
@@ -1434,7 +1559,7 @@ unsigned int read_HID() {
 		HID_move_miner();
 
 		// TNT
-		if (kbbut == but_space && cnt_TNT > 0) {
+		if (kbbut == but_TNT && cnt_TNT > 0) {
 			HID_TNT();
 		}
 

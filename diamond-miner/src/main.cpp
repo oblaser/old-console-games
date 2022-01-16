@@ -29,8 +29,6 @@ int main() {
 
 			print();
 
-			Sleep(50);
-
 			loop_cond = read_HID();
 			if (loop_cond == ret_game) {
 				move_others();
@@ -38,6 +36,8 @@ int main() {
 			}
 
 		} while (loop_cond != ret_exit && loop_cond != ret_restart);
+
+		delete_con();
 
 	} while (loop_cond != ret_exit);
 

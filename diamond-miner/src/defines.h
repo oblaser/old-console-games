@@ -10,7 +10,7 @@
 
 #ifndef defines_h
 
-#define release_version	"1.1.3"
+#define release_version	"1.2.1"
 
 // window
 #define window_width	545
@@ -66,14 +66,17 @@
 #define c_border_hor	205
 
 // keys
+#define but_enter		0x0D
+#define but_esc			0x1B
+#define but_space		0x20
+
+#define but_kb_mode		but_enter
+#define but_con_mode	but_space
+
 #define but_up			0x48
 #define but_down		0x50
 #define but_right		0x4D
 #define but_left		0x4B
-
-#define but_enter		0x0D
-#define but_esc			0x1B
-#define but_space		0x20
 
 #define but_menu		but_esc
 #define but_restart		0x72	// r
@@ -86,6 +89,24 @@
 
 #define but_TNT			but_space
 #define but_C4			0x63	// c
+
+#define con_up			XINPUT_GAMEPAD_DPAD_UP
+#define con_down		XINPUT_GAMEPAD_DPAD_DOWN
+#define con_right		XINPUT_GAMEPAD_DPAD_RIGHT
+#define con_left		XINPUT_GAMEPAD_DPAD_LEFT
+
+#define con_menu		XINPUT_GAMEPAD_START	// options
+#define con_store		XINPUT_GAMEPAD_A		// X
+#define con_C4			XINPUT_GAMEPAD_B		// O
+#define con_TNT			XINPUT_GAMEPAD_X		// square
+#define con_map			XINPUT_GAMEPAD_Y		// triangle
+
+#define con_stick_th	15000
+#define con_stick_th_	-15000
+//#define con_trig_th	10
+
+#define print_delay		50
+#define con_delay		100
 
 // store
 #define price_TNT		1
