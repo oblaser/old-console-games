@@ -2,13 +2,13 @@
 // 
 // Author: Oliver Blaser
 // 
-// Date: 21.09.2015
+// Date: 22.09.2015
 //
 // Description: Diamond Miner main-file
 // 
 //////////////////////////////////////////////////////
 
-#include "DiamondMiner_0.0_lib.h"
+#include "DiamondMiner_0.1_lib.h"
 
 int main() {
 
@@ -23,6 +23,7 @@ int main() {
 
 		// create & display field
 		func.create_field();
+		func.create_mine();
 		func.set_color();
 		func.print();
 
@@ -33,6 +34,7 @@ int main() {
 			ml_cond = func.read_kb();
 			
 			func.set_character_position();
+			func.lamp();
 
 			func.set_color();
 			func.print();

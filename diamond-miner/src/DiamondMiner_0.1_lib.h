@@ -2,7 +2,7 @@
 // 
 // Author: Oliver Blaser
 // 
-// Date: 21.09.2015
+// Date: 22.09.2015
 //
 // Description: Diamond Miner library Headerfile
 // 
@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <Windows.h>
 #include <conio.h>
+#include <time.h>
 
 // define commands
 #define clr_scr		system("cls");
@@ -28,14 +29,12 @@
 
 #define c_character	1
 #define c_safepoint '#'
+#define c_diamond	5
+#define c_dynamite	20
 
-#define c_field		176
-#define c_border_v	219
-#define c_border_h	219
-#define c_corner_ul	219
-#define c_corner_ur	219
-#define c_corner_dl	219
-#define c_corner_dr	219
+#define c_to_explore	206
+#define c_wall			219
+#define c_to_dig		177
 
 // define fieldsize
 #define field_width	55	// inclusive border
@@ -45,20 +44,25 @@
 class variable {
 public:
 	unsigned char field[field_width][field_hight];
+	unsigned char mine[field_width][field_hight];
 	unsigned char kbbut;
 	unsigned int page;
 	unsigned int cnt_diamond;
+	unsigned int cnt_dynamite;
+	unsigned int store_item;
 };
 
 // class for functions, use only one object
 class function {
 public:
 	void create_field();
+	void create_mine();
 	int read_kb();
 	void clear_character_position();
 	void set_character_position();
 	void print();
 	void set_color();
+	void lamp();
 };
 
 // class for coordinates
@@ -75,6 +79,7 @@ public:
 	void pause();
 	void instructions();
 	void about();
+	void store();
 };
 
 #define DM_lib
