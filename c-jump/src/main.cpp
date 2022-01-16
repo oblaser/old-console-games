@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		01.01.2016
+// Date:		16.06.2016
 //
 // Description:	Mainfile of C Jump
 // 
@@ -36,6 +36,7 @@ int main() {
 
 		} while (loop_cond != ret_exit);
 
+		save_file();
 	}
 
 	return 0;

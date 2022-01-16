@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		01.01.2016
+// Date:		16.06.2016
 //
 // Description:	Functions for C Jump
 // 
@@ -22,8 +22,10 @@ FILE * fp;
 clock_t t_old;
 clock_t t_new;
 
+////////////////////////////////////////////////////////////////////////////////////////
 // controller object
 XboxController * controller1;
+////////////////////////////////////////////////////////////////////////////////////////
 
 /* --- variables --- */
 
@@ -107,7 +109,7 @@ unsigned char pic_bar_once[5] = { c_bar_once, c_bar_once, c_bar_once, c_bar_once
 // bar transparent
 unsigned char pic_bar_trans[5] = { c_bar_trans, c_bar_trans, c_bar_trans, c_bar_trans, c_bar_trans };
 
-// Quid L
+// Quid
 unsigned char pic_quid[5][5] = {
 	{ 218, 196, 196, 196, 191 },
 	{ 179,  79,  32,  79, 179 },
@@ -116,8 +118,26 @@ unsigned char pic_quid[5][5] = {
 	{ 217, 217,  32, 192, 192 }
 };
 
+// Monster a
+unsigned char pic_monster_a[4][5] = {
+	{  32,  32,  95,  32,  32 },
+	{  32,  79,  32,  79,  32 },
+	{  47,  32, 193,  32,  92 },
+	{ 217, 217,  32, 192, 192 }
+};
+
+// Monster b
+unsigned char pic_monster_b[5][5] = {
+	{  32,  95,  95,  95,  32 },
+	{  47,  79,  32,  79,  92 },
+	{ 179,  32, 186,  32, 179 },
+	{ 195, 194, 196, 194, 180 },
+	{ 217, 217,  32, 192, 192 }
+};
+
 /* --- functions --- */
 
+////////////////////////////////////////////////////////////////////////////////////////
 // functions of controller class
 XboxController::XboxController(int f_playerNum) {
 	conNum = f_playerNum - 1;
@@ -158,6 +178,7 @@ void delete_con() {
 
 	delete(controller1);
 }
+////////////////////////////////////////////////////////////////////////////////////////
 
 // CPU informations
 unsigned int get_CPU_freq(unsigned int f_CPU_num){
@@ -262,11 +283,33 @@ unsigned int print_pic_quid_text(unsigned int f_print_x, unsigned int f_print_y)
 	return 0;
 }
 
-unsigned int print_pic_bar(unsigned int f_select, unsigned int f_print_x, unsigned int f_print_y) {
+unsigned int print_pic(unsigned int f_select, unsigned int f_print_x, unsigned int f_print_y) {
 
 	y.draw = 0;
 
 	switch (f_select) {
+
+	case c_monster_a:
+
+		for (y.draw = 0; y.draw < 4; y.draw++) {
+			for (x.draw = 0; x.draw < 5; x.draw++) {
+				gotoxy(x.draw + f_print_x, y.draw + (f_print_y - 3));
+				printf("%c", pic_monster_a[y.draw][x.draw]);
+			}
+		}
+
+		break;
+
+	case c_monster_b:
+
+		for (y.draw = 0; y.draw < 5; y.draw++) {
+			for (x.draw = 0; x.draw < 5; x.draw++) {
+				gotoxy(x.draw + f_print_x, y.draw + (f_print_y - 4));
+				printf("%c", pic_monster_b[y.draw][x.draw]);
+			}
+		}
+
+		break;
 
 	case c_bar_solid:
 
@@ -320,7 +363,7 @@ unsigned int print_pic_bar(unsigned int f_select, unsigned int f_print_x, unsign
 	default:
 		break;
 	}
-	
+
 	return 0;
 }
 
@@ -425,9 +468,21 @@ unsigned int save_file() {
 // create a bar-structure in the field array
 unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_y) {
 
-	if (f_select != 0) {
+	if (f_select == c_bar_break || f_select == c_bar_move || f_select == c_bar_once || f_select == c_bar_solid || f_select == c_bar_trans) {
 
 		field[f_y - 1][f_x] = c_bar_trans;
+		field[f_y][f_x] = f_select;
+	}
+
+	if (f_select == c_monster_a) {
+
+		field[f_y - 4][f_x] = c_bar_trans;
+		field[f_y][f_x] = f_select;
+	}
+
+	if (f_select == c_monster_b) {
+
+		field[f_y - 5][f_x] = c_bar_trans;
 		field[f_y][f_x] = f_select;
 	}
 
@@ -441,7 +496,9 @@ unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_
 // start conditions
 unsigned int start() {
 
+	///////////////////////////////////////////////////////////////////////////////////////
 	controller1 = new XboxController(1);
+	///////////////////////////////////////////////////////////////////////////////////////
 
 	// turn off cursor
 	set_cursor(0, cursor_hight);
@@ -457,8 +514,8 @@ unsigned int start() {
 
 	// times
 	t_quid_min = get_CPU_freq(0) / 890;
-	t_wait_button = 3; get_CPU_freq(0) / 890;
-	t_attack = get_CPU_freq(0) / 890;
+	t_wait_button = get_CPU_freq(0) / 1100;
+	t_attack = get_CPU_freq(0) / 1100;
 	t_move_bar = get_CPU_freq(0) / 297;
 
 	return 0;
@@ -546,7 +603,7 @@ unsigned int read_HID() {
 		case 'game':
 
 			if ((GetAsyncKeyState(KB_move_l) & MSB_short) || (GetAsyncKeyState(KB_move_l_alt) & MSB_short) ||
-				(controller1->getState().Gamepad.sThumbLX < XI_stick_th_) || (controller1->getState().Gamepad.wButtons & XI_move_l)) {
+				(controller1->getState().Gamepad.sThumbLX <= XI_stick_th_) || (controller1->getState().Gamepad.wButtons & XI_move_l)) {
 
 				x.quid--;
 				print_en = 1;
@@ -555,7 +612,7 @@ unsigned int read_HID() {
 			}
 
 			if ((GetAsyncKeyState(KB_move_r) & MSB_short) || (GetAsyncKeyState(KB_move_r_alt) & MSB_short) ||
-				(controller1->getState().Gamepad.sThumbLX > XI_stick_th) || (controller1->getState().Gamepad.wButtons & XI_move_r)) {
+				(controller1->getState().Gamepad.sThumbLX >= XI_stick_th) || (controller1->getState().Gamepad.wButtons & XI_move_r)) {
 
 				x.quid++;
 				print_en = 1;
@@ -563,7 +620,7 @@ unsigned int read_HID() {
 				tmr_wait_button = t_wait_button;
 			}
 
-			if (((GetAsyncKeyState(KB_attack) & MSB_short) || (controller1->getState().Gamepad.wButtons & XI_attack)) && 
+			if (((GetAsyncKeyState(KB_attack) & MSB_short) || (controller1->getState().Gamepad.bRightTrigger >= XI_RT_th) || (controller1->getState().Gamepad.wButtons & XI_attack)) && 
 				attack_rdy) {
 
 				x.attack = x.quid + 2;
@@ -778,6 +835,21 @@ unsigned int shift_down() {
 		}
 	}
 
+	// monsters
+	if (score % monster_a_ == 2) {
+
+		for (x.draw = 1; x.draw < field_width; x.draw++) {
+			if (field[9][x.draw] == c_bar_once || field[9][x.draw] == c_bar_solid) create_bar(c_monster_a, x.draw, 8);
+		}
+	}
+
+	if (score % monster_b_ == 2) {
+
+		for (x.draw = 1; x.draw < field_width; x.draw++) {
+			if (field[9][x.draw] == c_bar_once || field[9][x.draw] == c_bar_solid) create_bar(c_monster_b, x.draw, 8);
+		}
+	}
+
 	// increment score
 	score++;
 
@@ -845,6 +917,35 @@ unsigned int set_positions() {
 		print_en = 1;
 		tmr_attack = t_attack;
 
+		for (int i = -3; i <= 7; i++) {
+			if (field[y.attack][x.attack - i] == c_monster_a) {
+
+				for (int j = -3; j <= 3; j += 3) {
+					if ((field[y.attack + 1][x.attack + j] != c_bar_break) &&
+						(field[y.attack + 1][x.attack + j] != c_bar_move) &&
+						(field[y.attack + 1][x.attack + j] != c_bar_once) &&
+						(field[y.attack + 1][x.attack + j] != c_bar_solid) &&
+						(field[y.attack + 1][x.attack + j] != c_bar_trans))
+					{
+						gotoxy(x.attack + j, y.attack + 1);
+						printf(" ");
+					}
+				}
+
+				create_bar(c_bar_trans, x.attack - i, y.attack);
+				create_bar(c_bar_trans, x.attack - i, y.attack - 2);
+				y.attack = 1;
+			}
+
+			if (field[y.attack][x.attack - i] == c_monster_b) {
+
+				create_bar(c_bar_trans, x.attack - i, y.attack);
+				create_bar(c_bar_trans, x.attack - i, y.attack - 2);
+				create_bar(c_bar_trans, x.attack - i, y.attack - 3);
+				y.attack = 1;
+			}
+		}
+
 		if (y.attack < 3) attack_rdy = 1;
 	}
 
@@ -855,10 +956,11 @@ unsigned int set_positions() {
 
 		if (quid_jump_cnt <= 0) quid_dir = 1;
 
-		// detect bars
+		// detect bars & monsters
 		quid_move_en = 1;
 
 		for (int i = -4; i <= 4; i++) {
+
 			switch (field[y.quid + 5][x.quid + i]) {
 
 			case c_bar_solid:
@@ -888,6 +990,29 @@ unsigned int set_positions() {
 			default:
 				break;
 			}
+
+			if (field[y.quid + 9][x.quid + i] == c_monster_a) {
+
+				quid_move_en = 0;
+
+				if (quid_dir > 0) {
+					quid_jump_cnt = quid_max_jump;
+					create_bar(c_bar_trans, x.quid + i, y.quid + 9);
+					create_bar(c_bar_trans, x.quid + i, y.quid + 7);
+				}
+			}
+
+			if (field[y.quid + 10][x.quid + i] == c_monster_b) {
+
+				quid_move_en = 0;
+
+				if (quid_dir > 0) {
+					quid_jump_cnt = quid_max_jump;
+					create_bar(c_bar_trans, x.quid + i, y.quid + 10);
+					create_bar(c_bar_trans, x.quid + i, y.quid + 8);
+					create_bar(c_bar_trans, x.quid + i, y.quid + 6);
+				}
+			}
 		}
 
 		// set position for quid
@@ -904,6 +1029,12 @@ unsigned int set_positions() {
 		}
 
 		// jump up -> shift down
+		for (int i = -4; i <= 4; i++) {
+
+			if (field[y.quid - 1][x.quid + i] == c_monster_a) return ret_exit;
+			if (field[y.quid - 1][x.quid + i] == c_monster_b) return ret_exit;
+		}
+
 		if (y.quid < 13) {
 			shift_down();
 			y.quid = 13;
@@ -913,7 +1044,6 @@ unsigned int set_positions() {
 		if (y.quid > field_height - 4) {
 
 			y.quid = field_height - 4;
-			save_file();
 			
 			return ret_exit;
 		}
@@ -946,7 +1076,7 @@ unsigned int page_start() {
 
 		printxy("Action  Keyboard  Controller", 2, 30);
 		printxy("move    A / D     left stick", 2, 32);
-		printxy("attack  Space     A", 2, 33);
+		printxy("attack  Space     A / RT", 2, 33);
 		printxy("start   Enter     Start", 2, 34);
 
 		print_once = 0;
@@ -986,23 +1116,20 @@ unsigned int page_game() {
 		}
 	}
 
-	// bars
-	for (int i = 3; i <= field_height+1; i++) {
+	// bars & monsters
+	for (int i = 3; i <= field_height + 1; i++) {
 		for (int j = 1; j <= field_width - 4; j++) {
-			print_pic_bar(field[i][j], j, i);
+			print_pic(field[i][j], j, i);
 		}
 	}
 
 	// attack
-	if (!attack_rdy) {
-		gotoxy(x.attack, y.attack);
-		printf("%c", c_attack);
-		gotoxy(x.attack, y.attack + 1);
-		printf(" ");
-	}
-
-	else {
-		gotoxy(x.attack, y.attack + 1);
+	for (int i = -3; i <= 3; i += 3) {
+		if (!attack_rdy) {
+			gotoxy(x.attack + i, y.attack);
+			printf("%c", c_attack);
+		}
+		gotoxy(x.attack + i, y.attack + 1);
 		printf(" ");
 	}
 

@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		01.01.2016
+// Date:		16.06.2016
 //
 // Description:	Defines for C Jump
 // 
@@ -10,7 +10,7 @@
 
 #ifndef defines_h
 
-#define release_version	"2.0.0"
+#define release_version	"2.1.7"
 
 // window
 #define window_width	300
@@ -49,6 +49,9 @@
 #define c_bar_once		177
 #define c_bar_trans		32
 
+#define c_monster_a		193
+#define c_monster_b		186
+
 #define c_quid			35
 #define c_attack		254
 
@@ -56,6 +59,8 @@
 // diverses
 #define quid_max_jump	13
 #define no_bar_max		8
+#define monster_a_		112
+#define monster_b_		312
 
 // keys
 #define	MSB_short		0x8000
@@ -74,6 +79,7 @@
 
 #define XI_stick_th		7000
 #define XI_stick_th_	-7000
+#define XI_RT_th		50
 
 // last button
 #define but_left		1

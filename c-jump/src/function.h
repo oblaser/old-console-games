@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		01.01.2016
+// Date:		16.06.2016
 //
 // Description:	Functions for C Jump
 // 
@@ -17,8 +17,10 @@
 #include <time.h>
 #include <Windows.h>
 
+////////////////////////////////////////////////////////////////////////////////////////
 #include <Xinput.h>
 #pragma comment(lib, "XInput.lib")
+////////////////////////////////////////////////////////////////////////////////////////
 
 #include <powrprof.h>
 #pragma comment(lib, "powrprof.lib")
@@ -35,6 +37,7 @@ public:
 	unsigned int move_bar;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////
 // controller class
 class XboxController {
 private:
@@ -48,6 +51,7 @@ public:
 };
 
 void delete_con();
+////////////////////////////////////////////////////////////////////////////////////////
 
 // CPU informations
 typedef struct _PROCESSOR_POWER_INFORMATION {
@@ -77,7 +81,7 @@ unsigned int error(unsigned int f_error_nr);
 
 // print pic
 unsigned int print_pic_quid_text(unsigned int f_print_x, unsigned int f_print_y);
-unsigned int print_pic_bar(unsigned int f_select, unsigned int f_print_x, unsigned int f_print_y);
+unsigned int print_pic(unsigned int f_select, unsigned int f_print_x, unsigned int f_print_y);
 unsigned int print_pic_quid(unsigned int f_print_x, unsigned int f_print_y);
 
 // print counters
@@ -120,7 +124,7 @@ unsigned int page_game();
 // print page
 unsigned int print();
 
-// 1ms "interrupt"
+// 10ms "interrupt"
 unsigned int interrupt_10ms();
 
 // handle with time
