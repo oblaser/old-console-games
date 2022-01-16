@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		20.12.2015
+// Date:		23.12.2015
 //
 // Description:	Functions for Quid
 // 
@@ -32,22 +32,8 @@ public:
 	unsigned int move_bar;
 };
 
-// controller class
-class XboxController {
-private:
-	XINPUT_STATE conState;
-public:
-	int conNum;
-	XboxController(int f_playerNum);
-	XINPUT_STATE getState();
-	bool connected();
-	void vibrate(int f_L_val, int f_R_val);
-};
 
 /* --- std func --- */
-
-// don't show the scroll bar, by changeing screenbuffer
-unsigned int scr_buf();
 
 // cursor settings function
 unsigned int set_cursor(bool f_state, int f_size);
@@ -81,9 +67,6 @@ unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_
 // set values to default
 unsigned int set_default();
 
-// read controller
-unsigned int read_con();
-
 // read HID
 unsigned int read_HID();
 
@@ -111,9 +94,6 @@ unsigned int interrupt_10ms();
 
 // handle with time
 unsigned int time_handler();
-
-// 10ms delay
-unsigned int delay_10ms(int f_time);
 
 #define functions_h
 #endif

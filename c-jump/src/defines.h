@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		20.12.2015
+// Date:		23.12.2015
 //
 // Description:	Defines for Quid
 // 
@@ -10,7 +10,7 @@
 
 #ifndef defines_h
 
-#define release_version	"1.3.3"
+#define release_version	"1.4.2"
 
 // window
 #define window_width	300
@@ -59,15 +59,6 @@
 #define KB_attack		0x20	// space
 #define KB_start		0x0D	// enter
 
-#define XI_stick_th		15000
-#define XI_stick_th_	-15000
-//#define con_trig_th		10
-
-#define XI_move_l		XINPUT_GAMEPAD_DPAD_LEFT
-#define XI_move_r		XINPUT_GAMEPAD_DPAD_RIGHT
-#define XI_attack		XINPUT_GAMEPAD_A	// X
-#define XI_start		XINPUT_GAMEPAD_Y	// triangle
-
 // last button
 #define but_left		1
 #define but_right		2
@@ -77,11 +68,10 @@
 // error codes
 #define err_bars		1
 #define err_page_print	2
-#define err_read_HID	3
+#define err_page_HID	3
 #define err_read_f		4
 #define err_write_f		5
-#define err_open_f		6
-#define err_read_con	7
+#define err_open_f	6
 
 // return codes
 #define ret_exit		1

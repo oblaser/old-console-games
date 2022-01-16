@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		20.12.2015
+// Date:		23.12.2015
 //
 // Description:	Functions for Quid
 // 
@@ -21,9 +21,6 @@ FILE * fp;
 // time handling
 clock_t t_old;
 clock_t t_new;
-
-// controller object
-XboxController * controller1;
 
 /* --- variables --- */
 
@@ -49,12 +46,12 @@ unsigned int last_but;
 bool print_once;
 bool print_en;
 bool quid_move_en;
-bool quid_overflow_l;
-bool quid_overflow_r;
 bool move_bar_en;
 bool rand_create_en;
 bool attack_rdy;
 bool bar_move_en;
+bool quid_overflow_l;
+bool quid_overflow_r;
 
 // counter
 unsigned int quid_jump_cnt;
@@ -109,49 +106,6 @@ unsigned char pic_quid[5][5] = {
 };
 
 /* --- functions --- */
-
-// functions of controller class
-XboxController::XboxController(int f_playerNum) {
-	conNum = f_playerNum - 1;
-}
-
-XINPUT_STATE XboxController::getState() {
-
-	ZeroMemory(&conState, sizeof(XINPUT_STATE));
-
-	XInputGetState(conNum, &conState);
-
-	return conState;
-}
-
-bool XboxController::connected() {
-
-	ZeroMemory(&conState, sizeof(XINPUT_STATE));
-
-	DWORD f_result = XInputGetState(conNum, &conState);
-
-	if (f_result == ERROR_SUCCESS) return 1;
-	else return 0;
-}
-
-void XboxController::vibrate(int f_L_val, int f_R_val) {
-
-	XINPUT_VIBRATION vibration;
-
-	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
-
-	vibration.wLeftMotorSpeed = f_L_val;
-	vibration.wRightMotorSpeed = f_R_val;
-
-	XInputSetState(conNum, &vibration);
-}
-
-
-// don't show the scroll bar, by changeing screenbuffer
-unsigned int scr_buf() {
-
-	return 0;
-}
 
 // cursor settings function
 unsigned int set_cursor(bool f_state, int f_size) {
@@ -408,8 +362,6 @@ unsigned int set_default() {
 	// window size and position
 	set_window_default;
 
-	scr_buf();
-
 	// set window title
 	system("title Quid");
 
@@ -469,58 +421,6 @@ unsigned int set_default() {
 	return 0;
 }
 
-// read controller
-unsigned int read_con() {
-
-	switch (page) {
-
-	case 'star':
-
-		if (controller1->getState().Gamepad.wButtons & XI_start) {
-			page = 'game';
-			print_en = 1;
-			last_but = but_start;
-			tmr_wait_button = t_wait_button;
-		}
-
-		break;
-
-	case 'game':
-
-		if ((controller1->getState().Gamepad.sThumbLX < XI_stick_th_) ||
-			(controller1->getState().Gamepad.wButtons & XI_move_l)) {
-			x.quid--;
-			print_en = 1;
-			last_but = but_left;
-			tmr_wait_button = t_wait_button;
-		}
-
-		if ((controller1->getState().Gamepad.sThumbLX > XI_stick_th) ||
-			(controller1->getState().Gamepad.wButtons & XI_move_r)) {
-			x.quid++;
-			print_en = 1;
-			last_but = but_right;
-			tmr_wait_button = t_wait_button;
-		}
-
-		if ((GetAsyncKeyState(KB_attack) & MSB_short) && attack_rdy) {
-			x.attack = x.quid + 2;
-			y.attack = y.quid - 1;
-			attack_rdy = 0;
-			last_but = but_attack;
-			tmr_wait_button = t_wait_button;
-		}
-
-		break;
-
-	default:
-		error(err_read_con);
-		break;
-	}
-
-	return 0;
-}
-
 // read HID
 unsigned int read_HID() {
 
@@ -528,10 +428,6 @@ unsigned int read_HID() {
 		
 		last_but = 0;
 
-		// controller
-//		if (controller1->connected()) read_con();
-
-		// keyboard
 		switch (page) {
 
 		case 'star':
@@ -572,7 +468,7 @@ unsigned int read_HID() {
 			break;
 
 		default:
-			error(err_read_HID);
+			error(err_page_HID);
 			break;
 		}
 	}
@@ -651,10 +547,10 @@ unsigned int shift_down() {
 
 		if (score < 500) quantity_bars = 30;
 		if (score > 500) quantity_bars = 50;
-		if (score > 700) quantity_bars = 80;
-		if (score > 1000) quantity_bars = 130;
-		if (score > 1500) quantity_bars = 170;
-		if (score > 2000) quantity_bars = 220;
+		if (score > 1000) quantity_bars = 70;
+		if (score > 1500) quantity_bars = 100;
+		if (score > 2000) quantity_bars = 130;
+		if (score > 2500) quantity_bars = 170;
 
 		// set position
 		f_x_bar = rand() % quantity_bars + 1;
@@ -679,19 +575,19 @@ unsigned int shift_down() {
 
 				// bar once
 			case 0:
-				cnt_no_bar = 0;
 				create_bar(c_bar_once, f_x_bar, f_y_bar);
+				cnt_no_bar = 0;
 				break;
 
 			case 1:
-				cnt_no_bar = 0;
 				if (score > 1500) create_bar(c_bar_once, f_x_bar, f_y_bar);
 				else create_bar(c_bar_solid, f_x_bar, f_y_bar);
+
+				cnt_no_bar = 0;
 				break;
 
 				// bar move
 			case 2:
-				cnt_no_bar = 0;
 				if (score > 1000 && bar_move_en) {
 					create_bar(c_bar_move, f_x_bar, f_y_bar);
 					x.move_bar = f_x_bar;
@@ -701,10 +597,12 @@ unsigned int shift_down() {
 				}
 
 				else create_bar(c_bar_solid, f_x_bar, f_y_bar);
+				
+				cnt_no_bar = 0;
+
 				break;
 
 			case 3:
-				cnt_no_bar = 0;
 				if (bar_move_en) {
 					create_bar(c_bar_move, f_x_bar, f_y_bar);
 					x.move_bar = f_x_bar;
@@ -714,19 +612,23 @@ unsigned int shift_down() {
 				}
 
 				else create_bar(c_bar_once, f_x_bar, f_y_bar);
-				break;
-
-				// bar break
-			case 4:
-				if (cnt_no_bar < no_bar_max) {
-					create_bar(c_bar_break, f_x_bar, f_y_bar);
-					cnt_no_bar++;
-				}
 				
-				else {
-					cnt_no_bar = 0;
-					create_bar(c_bar_solid, f_x_bar, f_y_bar);
+				cnt_no_bar = 0;
+
+				break;
+
+				// bar break
+			case 4:
+				if (cnt_no_bar < no_bar_max) {
+					create_bar(c_bar_break, f_x_bar, f_y_bar);
+					cnt_no_bar++;
 				}
+
+				else {
+					create_bar(c_bar_solid, f_x_bar, f_y_bar);
+					cnt_no_bar = 0;
+				}
+
 				break;
 
 			case 5:
@@ -736,43 +638,16 @@ unsigned int shift_down() {
 				}
 
 				else {
+					create_bar(c_bar_solid, f_x_bar, f_y_bar);
 					cnt_no_bar = 0;
-					create_bar(c_bar_solid, f_x_bar, f_y_bar);
-				}
-				break;
-
-/*
-				// bar break
-			case 4:
-				if (cnt_bar_break < bar_break_max) {
-					create_bar(c_bar_break, f_x_bar, f_y_bar);
-					cnt_bar_break++;
-				}
-
-				else {
-					create_bar(c_bar_solid, f_x_bar, f_y_bar);
-					cnt_bar_break = 0;
 				}
 
 				break;
 
-			case 5:
-				if (cnt_bar_break < bar_break_max) {
-					create_bar(c_bar_break, f_x_bar, f_y_bar);
-					cnt_bar_break++;
-				}
-
-				else {
-					create_bar(c_bar_solid, f_x_bar, f_y_bar);
-					cnt_bar_break = 0;
-				}
-
-				break;
-*/
 				// bar solid
 			default:
-				cnt_no_bar = 0;
 				create_bar(c_bar_solid, f_x_bar, f_y_bar);
+				cnt_no_bar = 0;
 				break;
 			}
 		}
@@ -782,10 +657,8 @@ unsigned int shift_down() {
 	}
 
 	else {
-
-		cnt_no_bar++;
-
 		rand_create_en = 1;
+		cnt_no_bar++;
 	}
 
 	// shift process
@@ -963,6 +836,9 @@ unsigned int page_start() {
 
 		print_pic_quid(24, 5);
 
+		printxy("I'm sorry! The controller", 2, 25);
+		printxy("doesn't work yet.", 2, 26);
+
 		printxy("Action  Keyboard  Controller", 2, 30);
 		printxy("move    A / D     left stick", 2, 32);
 		printxy("attack  Space     A", 2, 33);
@@ -990,6 +866,7 @@ unsigned int page_game() {
 	}
 
 	print_counters(0);
+
 
 	// quid clear on overflow
 	if (quid_overflow_l) {
