@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		15.12.2015
+// Date:		20.12.2015
 //
 // Description:	Functions for Quid
 // 
@@ -87,8 +87,11 @@ unsigned int read_HID();
 // quid speed
 unsigned int quid_speed(unsigned int f_jump_cnt);
 
-// shift down the array
+// shift down the array and create new bars
 unsigned int shift_down();
+
+// set quids x position
+unsigned int quid_x_pos();
 
 // set positions
 unsigned int set_positions();
