@@ -2,9 +2,9 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		26.12.2015
+// Date:		01.01.2016
 //
-// Description:	Mainfile of Quid
+// Description:	Mainfile of C Jump
 // 
 //////////////////////////////////////////////////////
 
@@ -15,6 +15,8 @@
 unsigned int loop_cond;
 
 int main() {
+
+	start();
 
 	// main loop
 	while(1) {

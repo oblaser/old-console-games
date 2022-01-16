@@ -2,9 +2,9 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		26.12.2015
+// Date:		01.01.2016
 //
-// Description:	Functions for Quid
+// Description:	Functions for C Jump
 // 
 //////////////////////////////////////////////////////
 
@@ -76,6 +76,9 @@ unsigned int save_file();
 
 // create a bar-structure in the field array
 unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_y);
+
+// start conditions
+unsigned int start();
 
 // set values to default
 unsigned int set_default();

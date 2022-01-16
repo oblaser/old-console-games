@@ -2,9 +2,9 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		26.12.2015
+// Date:		01.01.2016
 //
-// Description:	Functions for Quid
+// Description:	Functions for C Jump
 // 
 //////////////////////////////////////////////////////
 
@@ -75,13 +75,15 @@ unsigned char field[field_height + 2][field_width + 1];
 /* --- pictures --- */
 
 // title text
-unsigned char pic_quid_text[6][14] = {
-	{  32,  95,  95,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32 },
-	{  47,  32,  32,  92,  32,  32,  32,  32,  32, 124,  32,  32,  32, 124 },
-	{ 124,  32,  32, 124,  32,  32,  32,  32,  32,  32,  32,  32,  95, 124 },
-	{ 124,  32,  32, 124,  32, 124,  32, 124,  32, 124,  32,  47,  32, 124 },
-	{  92,  95,  95,  92,  32,  92,  95,  47,  32, 124,  32,  92,  95, 124 },
-	{  32,  32,  32,  32,  92,  95,  95,  95,  95,  95,  95,  95,  95,  95 }
+unsigned char pic_quid_text[8][23] = {
+	{  32,  95,  95,  32,  32,  32,  32,  95,  95,  95,  95,  95,  95,  95,  95,  95,  95,  95,  95,  95,  95,  95,  95 },
+	{  47,  32,  32,  92,  32,  32,  32,  32, 124,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32 },
+	{ 124,  32,  32,  32,  32,  32,  32,  32, 124,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  95,  32 },
+	{ 124,  32,  32,  32,  32,  32,  32,  32, 124,  32, 124,  32, 124,  32, 124,  47,  92,  47,  92,  32, 124,  32,  92 },
+	{ 124,  32,  32,  32,  32,  32,  32,  32, 124,  32, 124,  32, 124,  32, 124,  32, 124,  32, 124,  32, 124,  32, 124 },
+	{  92,  95,  95,  47,  32,  32,  92,  95,  47,  32,  92,  95,  47,  32, 124,  32, 124,  32, 124,  32, 124,  95,  47 },
+	{  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32, 124,  32,  32 },
+	{  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32, 124,  32,  32 },
 };
 
 // bar solid
@@ -208,8 +210,8 @@ unsigned int error(unsigned int f_error_nr) {
 
 unsigned int print_pic_quid_text(unsigned int f_print_x, unsigned int f_print_y) {
 
-	for (y.draw = 0; y.draw < 6; y.draw++) {
-		for (x.draw = 0; x.draw < 14; x.draw++) {
+	for (y.draw = 0; y.draw < 8; y.draw++) {
+		for (x.draw = 0; x.draw < 23; x.draw++) {
 			gotoxy(x.draw + f_print_x, y.draw + f_print_y);
 			printf("%c", pic_quid_text[y.draw][x.draw]);
 		}
@@ -394,8 +396,8 @@ unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_
 	return 0;
 }
 
-// set values to default
-unsigned int set_default() {
+// start conditions
+unsigned int start() {
 
 	controller1 = new XboxController(1);
 
@@ -409,7 +411,13 @@ unsigned int set_default() {
 	set_window_default;
 
 	// set window title
-	system("title Quid");
+	system("title C Jump");
+
+	return 0;
+}
+
+// set values to default
+unsigned int set_default() {
 
 	// time handler
 	t_old = clock() / 10;
@@ -880,13 +888,13 @@ unsigned int page_start() {
 		print_counters(0);
 		print_counters(1);
 
-		printxy("Quid", 27, 1);
+		printxy("C Jump", 25, 1);
 
 		print_pic_quid_text(4, 5);
-		gotoxy(13, 10);
+		gotoxy(21, 6);
 		printf("%s", release_version);
 
-		print_pic_quid(24, 5);
+		//print_pic_quid(24, 5);
 
 		printxy("Action  Keyboard  Controller", 2, 30);
 		printxy("move    A / D     left stick", 2, 32);
@@ -909,7 +917,7 @@ unsigned int page_game() {
 
 		print_counters(1);
 
-		printxy("Quid", 27, 1);
+		printxy("C Jump", 25, 1);
 
 		print_once = 1;
 	}

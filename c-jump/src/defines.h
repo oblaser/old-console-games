@@ -2,15 +2,15 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		26.12.2015
+// Date:		01.01.2016
 //
-// Description:	Defines for Quid
+// Description:	Defines for C Jump
 // 
 //////////////////////////////////////////////////////
 
 #ifndef defines_h
 
-#define release_version	"1.5.1"
+#define release_version	"1.5.2"
 
 // window
 #define window_width	300
@@ -25,7 +25,7 @@
 #define cursor_hight	10
 
 // save data
-#define file_name		"data.quid"
+#define file_name		"data.cjmp"
 #define save_number		10
 
 // times * 10 ms
