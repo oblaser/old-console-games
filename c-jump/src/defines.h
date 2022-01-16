@@ -10,7 +10,7 @@
 
 #ifndef defines_h
 
-#define release_version	"1.5.2"
+#define release_version	"2.0.0"
 
 // window
 #define window_width	300
@@ -28,11 +28,19 @@
 #define file_name		"data.cjmp"
 #define save_number		10
 
+/*
 // times * 10 ms
 #define t_quid_min		3
 #define t_wait_button	3
 #define t_attack		3
 #define t_move_bar		9
+*/
+
+// CPU informations
+#define WIN32_NO_STATUS
+
+#define NO_CPU			'ncpu'
+#define STATUS_SUCCESS	((NTSTATUS)0x00000000L)    // ntsubauth
 
 // characters
 #define c_bar_solid		219
@@ -59,6 +67,8 @@
 #define KB_attack		0x20	// space
 #define KB_start		0x0D	// enter
 
+#define XI_move_l		XINPUT_GAMEPAD_DPAD_LEFT
+#define XI_move_r		XINPUT_GAMEPAD_DPAD_RIGHT
 #define XI_attack		XINPUT_GAMEPAD_A		// X
 #define XI_start		XINPUT_GAMEPAD_START	// options
 

@@ -69,6 +69,12 @@ unsigned int tmr_wait_button;
 unsigned int tmr_attack;
 unsigned int tmr_move_bar;
 
+// times * 10 ms
+unsigned int t_quid_min;
+unsigned int t_wait_button;
+unsigned int t_attack;
+unsigned int t_move_bar;
+
 // field
 unsigned char field[field_height + 2][field_width + 1];
 
@@ -151,6 +157,42 @@ void XboxController::vibrate(int f_L_val, int f_R_val) {
 void delete_con() {
 
 	delete(controller1);
+}
+
+// CPU informations
+unsigned int get_CPU_freq(unsigned int f_CPU_num){
+	
+	// get the number or processors 
+	SYSTEM_INFO si = { 0 };
+	::GetSystemInfo(&si);
+
+	// allocate buffer to get info for each processor
+	const int size = si.dwNumberOfProcessors * sizeof(PROCESSOR_POWER_INFORMATION);
+	LPBYTE pBuffer = new BYTE[size];
+
+	NTSTATUS status = ::CallNtPowerInformation(ProcessorInformation, NULL, 0, pBuffer, size);
+
+	if (STATUS_SUCCESS == status) {
+
+		// list each processor frequency 
+		PPROCESSOR_POWER_INFORMATION ppi = (PPROCESSOR_POWER_INFORMATION)pBuffer;
+
+		DWORD nIndex = f_CPU_num;
+
+		if (f_CPU_num > si.dwNumberOfProcessors - 1) {
+			delete[]pBuffer;
+			return NO_CPU;
+		}
+
+		delete[]pBuffer;
+		return (ppi->CurrentMhz);
+
+	}
+	else {
+		delete[]pBuffer;
+	}
+
+	return 0;
 }
 
 // cursor settings function
@@ -413,6 +455,12 @@ unsigned int start() {
 	// set window title
 	system("title C Jump");
 
+	// times
+	t_quid_min = get_CPU_freq(0) / 890;
+	t_wait_button = 3; get_CPU_freq(0) / 890;
+	t_attack = get_CPU_freq(0) / 890;
+	t_move_bar = get_CPU_freq(0) / 297;
+
 	return 0;
 }
 
@@ -498,7 +546,7 @@ unsigned int read_HID() {
 		case 'game':
 
 			if ((GetAsyncKeyState(KB_move_l) & MSB_short) || (GetAsyncKeyState(KB_move_l_alt) & MSB_short) ||
-				(controller1->getState().Gamepad.sThumbLX < XI_stick_th_)) {
+				(controller1->getState().Gamepad.sThumbLX < XI_stick_th_) || (controller1->getState().Gamepad.wButtons & XI_move_l)) {
 
 				x.quid--;
 				print_en = 1;
@@ -507,7 +555,7 @@ unsigned int read_HID() {
 			}
 
 			if ((GetAsyncKeyState(KB_move_r) & MSB_short) || (GetAsyncKeyState(KB_move_r_alt) & MSB_short) ||
-				(controller1->getState().Gamepad.sThumbLX > XI_stick_th)) {
+				(controller1->getState().Gamepad.sThumbLX > XI_stick_th) || (controller1->getState().Gamepad.wButtons & XI_move_r)) {
 
 				x.quid++;
 				print_en = 1;

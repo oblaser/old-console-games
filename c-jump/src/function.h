@@ -20,6 +20,9 @@
 #include <Xinput.h>
 #pragma comment(lib, "XInput.lib")
 
+#include <powrprof.h>
+#pragma comment(lib, "powrprof.lib")
+
 // includeing files
 #include "defines.h"
 
@@ -45,6 +48,18 @@ public:
 };
 
 void delete_con();
+
+// CPU informations
+typedef struct _PROCESSOR_POWER_INFORMATION {
+	ULONG  Number;
+	ULONG  MaxMhz;
+	ULONG  CurrentMhz;
+	ULONG  MhzLimit;
+	ULONG  MaxIdleState;
+	ULONG  CurrentIdleState;
+} PROCESSOR_POWER_INFORMATION, *PPROCESSOR_POWER_INFORMATION;
+
+unsigned int get_CPU_freq(unsigned int f_CPU_num);
 
 /* --- std func --- */
 
