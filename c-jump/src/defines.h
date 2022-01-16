@@ -10,7 +10,7 @@
 
 #ifndef defines_h
 
-#define release_version	"1.2.5"
+#define release_version	"1.3.3"
 
 // window
 #define window_width	300
@@ -47,8 +47,7 @@
 
 // diverses
 #define quid_max_jump	13
-#define no_bar_max		7
-#define bar_break_max	4
+#define no_bar_max		8
 
 // keys
 #define	MSB_short		0x8000
@@ -60,13 +59,14 @@
 #define KB_attack		0x20	// space
 #define KB_start		0x0D	// enter
 
-#define XI_move			{ player1->getState().Gamepad.sThumbLX }
-#define XI_attack		XINPUT_GAMEPAD_A	// X
-#define XI_start		XINPUT_GAMEPAD_Y	// triangle
-
 #define XI_stick_th		15000
 #define XI_stick_th_	-15000
 //#define con_trig_th		10
+
+#define XI_move_l		XINPUT_GAMEPAD_DPAD_LEFT
+#define XI_move_r		XINPUT_GAMEPAD_DPAD_RIGHT
+#define XI_attack		XINPUT_GAMEPAD_A	// X
+#define XI_start		XINPUT_GAMEPAD_Y	// triangle
 
 // last button
 #define but_left		1
@@ -77,10 +77,11 @@
 // error codes
 #define err_bars		1
 #define err_page_print	2
-#define err_page_HID	3
+#define err_read_HID	3
 #define err_read_f		4
 #define err_write_f		5
-#define err_open_f	6
+#define err_open_f		6
+#define err_read_con	7
 
 // return codes
 #define ret_exit		1

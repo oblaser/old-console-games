@@ -23,7 +23,7 @@ clock_t t_old;
 clock_t t_new;
 
 // controller object
-XboxController * controller_1;
+XboxController * controller1;
 
 /* --- variables --- */
 
@@ -49,6 +49,8 @@ unsigned int last_but;
 bool print_once;
 bool print_en;
 bool quid_move_en;
+bool quid_overflow_l;
+bool quid_overflow_r;
 bool move_bar_en;
 bool rand_create_en;
 bool attack_rdy;
@@ -57,7 +59,6 @@ bool bar_move_en;
 // counter
 unsigned int quid_jump_cnt;
 unsigned int cnt_no_bar;
-unsigned int cnt_bar_break;
 
 // no bars at the same x pos
 unsigned int x_bar_old;
@@ -446,7 +447,6 @@ unsigned int set_default() {
 
 	// random bars
 	cnt_no_bar = no_bar_max;
-	cnt_bar_break = 0;
 
 	// field
 	for (y.draw = 0; y.draw < field_height + 1; y.draw++) {
@@ -469,6 +469,58 @@ unsigned int set_default() {
 	return 0;
 }
 
+// read controller
+unsigned int read_con() {
+
+	switch (page) {
+
+	case 'star':
+
+		if (controller1->getState().Gamepad.wButtons & XI_start) {
+			page = 'game';
+			print_en = 1;
+			last_but = but_start;
+			tmr_wait_button = t_wait_button;
+		}
+
+		break;
+
+	case 'game':
+
+		if ((controller1->getState().Gamepad.sThumbLX < XI_stick_th_) ||
+			(controller1->getState().Gamepad.wButtons & XI_move_l)) {
+			x.quid--;
+			print_en = 1;
+			last_but = but_left;
+			tmr_wait_button = t_wait_button;
+		}
+
+		if ((controller1->getState().Gamepad.sThumbLX > XI_stick_th) ||
+			(controller1->getState().Gamepad.wButtons & XI_move_r)) {
+			x.quid++;
+			print_en = 1;
+			last_but = but_right;
+			tmr_wait_button = t_wait_button;
+		}
+
+		if ((GetAsyncKeyState(KB_attack) & MSB_short) && attack_rdy) {
+			x.attack = x.quid + 2;
+			y.attack = y.quid - 1;
+			attack_rdy = 0;
+			last_but = but_attack;
+			tmr_wait_button = t_wait_button;
+		}
+
+		break;
+
+	default:
+		error(err_read_con);
+		break;
+	}
+
+	return 0;
+}
+
 // read HID
 unsigned int read_HID() {
 
@@ -476,6 +528,10 @@ unsigned int read_HID() {
 		
 		last_but = 0;
 
+		// controller
+//		if (controller1->connected()) read_con();
+
+		// keyboard
 		switch (page) {
 
 		case 'star':
@@ -516,7 +572,7 @@ unsigned int read_HID() {
 			break;
 
 		default:
-			error(err_page_HID);
+			error(err_read_HID);
 			break;
 		}
 	}
@@ -595,10 +651,10 @@ unsigned int shift_down() {
 
 		if (score < 500) quantity_bars = 30;
 		if (score > 500) quantity_bars = 50;
-		if (score > 1000) quantity_bars = 70;
-		if (score > 1500) quantity_bars = 100;
-		if (score > 2000) quantity_bars = 130;
-		if (score > 2500) quantity_bars = 170;
+		if (score > 700) quantity_bars = 80;
+		if (score > 1000) quantity_bars = 130;
+		if (score > 1500) quantity_bars = 170;
+		if (score > 2000) quantity_bars = 220;
 
 		// set position
 		f_x_bar = rand() % quantity_bars + 1;
@@ -618,23 +674,24 @@ unsigned int shift_down() {
 
 		else {
 
-			cnt_no_bar = 0;
-
 			// witchone
 			switch (rand() % 10) {
 
 				// bar once
 			case 0:
+				cnt_no_bar = 0;
 				create_bar(c_bar_once, f_x_bar, f_y_bar);
 				break;
 
 			case 1:
+				cnt_no_bar = 0;
 				if (score > 1500) create_bar(c_bar_once, f_x_bar, f_y_bar);
 				else create_bar(c_bar_solid, f_x_bar, f_y_bar);
 				break;
 
 				// bar move
 			case 2:
+				cnt_no_bar = 0;
 				if (score > 1000 && bar_move_en) {
 					create_bar(c_bar_move, f_x_bar, f_y_bar);
 					x.move_bar = f_x_bar;
@@ -647,6 +704,7 @@ unsigned int shift_down() {
 				break;
 
 			case 3:
+				cnt_no_bar = 0;
 				if (bar_move_en) {
 					create_bar(c_bar_move, f_x_bar, f_y_bar);
 					x.move_bar = f_x_bar;
@@ -658,6 +716,32 @@ unsigned int shift_down() {
 				else create_bar(c_bar_once, f_x_bar, f_y_bar);
 				break;
 
+				// bar break
+			case 4:
+				if (cnt_no_bar < no_bar_max) {
+					create_bar(c_bar_break, f_x_bar, f_y_bar);
+					cnt_no_bar++;
+				}
+				
+				else {
+					cnt_no_bar = 0;
+					create_bar(c_bar_solid, f_x_bar, f_y_bar);
+				}
+				break;
+
+			case 5:
+				if (cnt_no_bar < no_bar_max) {
+					create_bar(c_bar_break, f_x_bar, f_y_bar);
+					cnt_no_bar++;
+				}
+
+				else {
+					cnt_no_bar = 0;
+					create_bar(c_bar_solid, f_x_bar, f_y_bar);
+				}
+				break;
+
+/*
 				// bar break
 			case 4:
 				if (cnt_bar_break < bar_break_max) {
@@ -684,9 +768,10 @@ unsigned int shift_down() {
 				}
 
 				break;
-
+*/
 				// bar solid
 			default:
+				cnt_no_bar = 0;
 				create_bar(c_bar_solid, f_x_bar, f_y_bar);
 				break;
 			}
@@ -696,7 +781,12 @@ unsigned int shift_down() {
 		rand_create_en = 0;
 	}
 
-	else rand_create_en = 1;
+	else {
+
+		cnt_no_bar++;
+
+		rand_create_en = 1;
+	}
 
 	// shift process
 	y.move_bar++;
@@ -714,21 +804,19 @@ unsigned int shift_down() {
 }
 
 // set quids x position
-unsigned int quid_x_pos() {
+unsigned int quid_overflow() {
+
+	quid_overflow_l = 0;
+	quid_overflow_r = 0;
 
 	if (x.quid < 1) {
 		x.quid = 26;
-
-		for (int i = 0; i < 5; i++) {
-			printxy("     ", 1, y.quid + i);
-		}
+		quid_overflow_l = 1;
 	}
+
 	if (x.quid > 26) {
 		x.quid = 1;
-
-		for (int i = 0; i < 5; i++) {
-			printxy("     ", 26, y.quid + i);
-		}
+		quid_overflow_r = 1;
 	}
 
 	return 0;
@@ -780,7 +868,7 @@ unsigned int set_positions() {
 	}
 
 	// quid
-	quid_x_pos();
+	quid_overflow();
 
 	if (tmr_quid == 0) {
 
@@ -902,6 +990,19 @@ unsigned int page_game() {
 	}
 
 	print_counters(0);
+
+	// quid clear on overflow
+	if (quid_overflow_l) {
+		for (int i = 0; i < 5; i++) {
+			printxy("     ", 1, y.quid + i);
+		}
+	}
+
+	if (quid_overflow_r) {
+		for (int i = 0; i < 5; i++) {
+			printxy("     ", 26, y.quid + i);
+		}
+	}
 
 	// bars
 	for (int i = 3; i <= field_height+1; i++) {

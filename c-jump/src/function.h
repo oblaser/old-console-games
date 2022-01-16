@@ -81,6 +81,9 @@ unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_
 // set values to default
 unsigned int set_default();
 
+// read controller
+unsigned int read_con();
+
 // read HID
 unsigned int read_HID();
 
@@ -91,7 +94,7 @@ unsigned int quid_speed(unsigned int f_jump_cnt);
 unsigned int shift_down();
 
 // set quids x position
-unsigned int quid_x_pos();
+unsigned int quid_overflow();
 
 // set positions
 unsigned int set_positions();
