@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		10.12.2015
+// Date:		15.12.2015
 //
 // Description:	Functions for Quid
 // 
@@ -29,6 +29,7 @@ public:
 	unsigned int draw;
 	unsigned int quid;
 	unsigned int attack;
+	unsigned int move_bar;
 };
 
 // controller class

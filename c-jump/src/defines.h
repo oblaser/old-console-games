@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		10.12.2015
+// Date:		15.12.2015
 //
 // Description:	Defines for Quid
 // 
@@ -10,7 +10,7 @@
 
 #ifndef defines_h
 
-#define release_version	"1.0.0"
+#define release_version	"1.1.0"
 
 // window
 #define window_width	300
@@ -28,6 +28,7 @@
 #define t_quid_min		3
 #define t_wait_button	3
 #define t_attack		3
+#define t_move_bar		10
 
 // characters
 #define c_bar_solid		219
@@ -41,7 +42,8 @@
 
 
 // diverses
-#define quid_max_jump	14
+#define quid_max_jump	13
+#define no_bar_max		5
 
 // keys
 #define	MSB_short		0x8000
@@ -60,6 +62,12 @@
 #define XI_stick_th		15000
 #define XI_stick_th_	-15000
 //#define con_trig_th		10
+
+// last button
+#define but_left		1
+#define but_right		2
+#define but_attack		3
+#define but_start		4
 
 // error codes
 #define err_bars		1

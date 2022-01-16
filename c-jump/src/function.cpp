@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		10.12.2015
+// Date:		15.12.2015
 //
 // Description:	Functions for Quid
 // 
@@ -32,34 +32,36 @@ unsigned int page;
 
 // set directions of moving objects
 signed int quid_dir;
+signed int move_bar_dir;
 
 // score
 unsigned int score;
 unsigned int h_score;
 
-// to not printing static things every time
+// last butten that was pressed
+unsigned int last_but;
+
+// enable
 bool print_once;
 bool print_en;
-
-// quid move enable
 bool quid_move_en;
-
-// attack ready
+bool move_bar_en;
+bool rand_create_en;
 bool attack_rdy;
 
-// quid jump counter
+// counter
 unsigned int quid_jump_cnt;
+unsigned int cnt_no_bar;
+
 
 // timer variables
 unsigned int tmr_quid;
 unsigned int tmr_wait_button;
 unsigned int tmr_attack;
+unsigned int tmr_move_bar;
 
 // field
 unsigned char field[field_height + 1][field_width + 1];
-
-// next line
-unsigned char next_line[field_width + 1];
 
 /* --- pictures --- */
 
@@ -312,8 +314,15 @@ unsigned int save_file() {
 // create a bar-structure in the field array
 unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_y) {
 
-	field[f_y - 1][f_x] = c_bar_trans;
-	field[f_y][f_x] = f_select;
+	if (f_select == 0) {
+		field[f_y - 1][f_x] = c_bar_trans;
+		field[f_y][f_x] = 0;
+	}
+
+	else {
+		field[f_y - 1][f_x] = c_bar_trans;
+		field[f_y][f_x] = f_select;
+	}
 
 	return 0;
 }
@@ -363,8 +372,16 @@ unsigned int set_default() {
 	y.quid = 23;
 	quid_dir = 1;
 
+	move_bar_dir = 1;
+	move_bar_en = 1;
+
+	rand_create_en = 1;
+
 	// quid jump counter
 	quid_jump_cnt = quid_max_jump;
+
+	// random bars
+	cnt_no_bar = no_bar_max;
 
 	// field
 	for (y.draw = 0; y.draw < field_height + 1; y.draw++) {
@@ -377,13 +394,12 @@ unsigned int set_default() {
 	create_bar(c_bar_solid, 14, 37);
 	create_bar(c_bar_solid, 23, 37);
 
-	create_bar(c_bar_solid, 26, 24);
-	//create_bar(c_bar_solid, 21, 26);
-	//create_bar(c_bar_solid, 3, 28);
-
-	create_bar(c_bar_solid, 3, 20);
-	create_bar(c_bar_solid, 21, 13);
-	create_bar(c_bar_solid, 1, 8);
+	create_bar(c_bar_solid, 3, 28);
+	create_bar(c_bar_solid, 11, 25);
+	create_bar(c_bar_solid, 24, 18);
+	create_bar(c_bar_solid, 6, 13);
+	create_bar(c_bar_solid, 16, 8);
+	create_bar(c_bar_solid, 1, 5);
 
 	return 0;
 }
@@ -400,6 +416,7 @@ unsigned int read_HID() {
 			if (GetAsyncKeyState(KB_start) & MSB_short) {
 				page = 'game';
 				print_en = 1;
+				last_but = but_start;
 				tmr_wait_button = t_wait_button;
 			}
 			
@@ -410,12 +427,14 @@ unsigned int read_HID() {
 			if ((GetAsyncKeyState(KB_move_l) & MSB_short) || (GetAsyncKeyState(KB_move_l_alt) & MSB_short)) {
 				if(x.quid > 1) x.quid--;
 				print_en = 1;
+				last_but = but_left;
 				tmr_wait_button = t_wait_button;
 			}
 
 			if ((GetAsyncKeyState(KB_move_r) & MSB_short) || (GetAsyncKeyState(KB_move_r_alt) & MSB_short)) {
 				if (x.quid < 26) x.quid++;
 				print_en = 1;
+				last_but = but_right;
 				tmr_wait_button = t_wait_button;
 			}
 
@@ -423,6 +442,7 @@ unsigned int read_HID() {
 				x.attack = x.quid + 2;
 				y.attack = y.quid - 1;
 				attack_rdy = 0;
+				last_but = but_attack;
 				tmr_wait_button = t_wait_button;
 			}
 
@@ -489,18 +509,48 @@ unsigned int quid_speed(unsigned int f_jump_cnt) {
 // shift down the array
 unsigned int shift_down() {
 
+	// initialisize random function
+	time_t f_rand_init;
+	time(&f_rand_init);
+	srand((unsigned int)f_rand_init);
+
 	// random filled next line
+	if (rand_create_en) {
 
-
-	// shift process
-	for (y.draw = 37; y.draw > 3; y.draw--) {
-		for (x.draw = 1; x.draw <= 30; x.draw++) {
-			field[y.draw][x.draw] = field[y.draw - 1][x.draw];
+		for (y.draw = 0; y.draw <= 2; y.draw++) {
+			for (x.draw = 1; x.draw <= field_width; x.draw++) {
+				field[y.draw][x.draw] = 0;
+			}
 		}
+
+		// create bar, yes, no
+		if ((rand() % 5 + 1) > 1 && cnt_no_bar < no_bar_max) {
+
+			// no bar
+
+			cnt_no_bar++;
+		}
+
+		else {
+
+			// wichone
+			
+			create_bar(c_bar_solid, (rand() % 26 + 1), 2);
+
+			cnt_no_bar = 0;
+		}
+		
+
+		rand_create_en = 0;
 	}
 
-	for (x.draw = 1; x.draw <= 30; x.draw++) {
-		field[3][x.draw] = next_line[x.draw];
+	else rand_create_en = 1;
+
+	// shift process
+	for (y.draw = 37; y.draw >= 2; y.draw--) {
+		for (x.draw = 1; x.draw <= field_width; x.draw++) {
+			field[y.draw][x.draw] = field[y.draw - 1][x.draw];
+		}
 	}
 
 	score++;
@@ -525,15 +575,38 @@ unsigned int set_positions() {
 
 		if (quid_jump_cnt <= 0) quid_dir = 1;
 
+		// detect bars
 		quid_move_en = 1;
 
 		for (int i = -4; i <= 4; i++) {
-			if (field[y.quid + 5][x.quid + i] == c_bar_solid) {
+			switch (field[y.quid + 5][x.quid + i]) {
+
+			case c_bar_solid:
 				quid_move_en = 0;
-				quid_jump_cnt = quid_max_jump;
+				if (quid_dir > 0) quid_jump_cnt = quid_max_jump;
+				break;
+
+			case c_bar_move:
+				quid_move_en = 0;
+				if (quid_dir > 0) quid_jump_cnt = quid_max_jump;
+				break;
+
+			case c_bar_break:
+				create_bar(0, x.quid + i, y.quid + 5);
+				break;
+
+			case c_bar_once:
+				quid_move_en = 0;
+				if (quid_dir > 0) quid_jump_cnt = quid_max_jump;
+				create_bar(0, x.quid + i, y.quid + 5);
+				break;
+
+			default:
+				break;
 			}
 		}
 
+		// set position for quid
 		if (quid_move_en) {
 			y.quid += quid_dir;
 			quid_jump_cnt += quid_dir;
@@ -546,8 +619,13 @@ unsigned int set_positions() {
 			quid_jump_cnt += quid_dir;
 		}
 
-		if (y.quid < 13) shift_down();
+		// jump up
+		if (y.quid < 13) {
+			shift_down();
+			y.quid = 13;
+		}
 
+		// fall down -> game over
 		if (y.quid > field_height - 4) {
 
 			y.quid = field_height - 4;
@@ -559,6 +637,15 @@ unsigned int set_positions() {
 		print_en = 1;
 
 		tmr_quid = quid_speed(quid_jump_cnt);
+	}
+
+	// moveing bars
+	if (tmr_move_bar == 0) {
+
+
+		tmr_move_bar = t_move_bar;
+
+		print_en = 1;
 	}
 
 	return 0;
@@ -611,7 +698,6 @@ unsigned int page_game() {
 	// bars
 	for (int i = 3; i <= field_height; i++) {
 		for (int j = 1; j <= field_width; j++) {
-			print_pic_bar(field[i - 1][j], j, i - 1);
 			print_pic_bar(field[i][j], j, i);
 		}
 	}
@@ -630,16 +716,23 @@ unsigned int page_game() {
 	}
 
 	// quid
-	x.draw = x.quid - 1;
-	for (y.draw = y.quid; y.draw < y.quid + 5; y.draw++) {
-		printxy(" ", x.draw, y.draw);
+	// clear left
+	if (last_but == but_right || last_but == but_attack) {
+		x.draw = x.quid - 1;
+		for (y.draw = y.quid - 1; y.draw <= y.quid + 5; y.draw++) {
+			printxy(" ", x.draw, y.draw);
+		}
 	}
 
-	x.draw = x.quid + 5;
-	for (y.draw = y.quid; y.draw < y.quid + 5; y.draw++) {
-		printxy(" ", x.draw, y.draw);
+	// clear right
+	if (last_but == but_left || last_but == but_attack) {
+		x.draw = x.quid + 5;
+		for (y.draw = y.quid - 1; y.draw <= y.quid + 5; y.draw++) {
+			printxy(" ", x.draw, y.draw);
+		}
 	}
 
+	// clear over
 	if (quid_dir > 0) {
 		y.draw = y.quid - 1;
 		for (x.draw = x.quid; x.draw < x.quid + 5; x.draw++) {
@@ -647,6 +740,7 @@ unsigned int page_game() {
 		}
 	}
 
+	// clear under
 	else {
 		y.draw = y.quid + 5;
 		for (x.draw = x.quid; x.draw < x.quid + 5; x.draw++) {
@@ -654,6 +748,7 @@ unsigned int page_game() {
 		}
 	}
 
+	// print quid
 	print_pic_quid(x.quid, y.quid);
 
 	return 0;
@@ -693,6 +788,7 @@ unsigned int interrupt_10ms() {
 	if (tmr_quid > 0) tmr_quid--;
 	if (tmr_attack > 0) tmr_attack--;
 	if (tmr_wait_button > 0) tmr_wait_button--;
+	if (tmr_move_bar > 0) tmr_move_bar--;
 
 	return 0;
 }
