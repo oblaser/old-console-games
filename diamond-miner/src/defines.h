@@ -2,13 +2,15 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		23.10.2015
+// Date:		24.10.2015
 //
 // Description:	Defines for Diamond Miner
 // 
 //////////////////////////////////////////////////////
 
 #ifndef defines_h
+
+#define release_version	"1.1.3"
 
 // window
 #define window_width	545
@@ -18,6 +20,11 @@
 
 // cursor
 #define cursor_hight	10
+
+// save data
+#define save_elements	20
+#define file_name_len	100
+#define c_no_file		45
 
 // thousandth of walls and diamonds
 #define tousnd_diamond	10
@@ -74,6 +81,8 @@
 #define but_store		but_enter
 #define but_about		0x61	// a
 #define but_map			0x6D	// m
+#define but_load		0x6C	// l
+#define but_save		0x73	// s
 
 #define but_TNT			but_space
 #define but_C4			0x63	// c
@@ -94,14 +103,21 @@
 #define ret_game		3
 
 // error codes
-#define error_c_print	001
-#define error_c_r_HID	002
+#define err_print		1
+#define err_read_HID	2
+#define err_pic			3
+#define err_open_f		4
+#define err_create_f	5
+#define err_write_f		6
+#define err_read_f		7
+#define err_value_name	8
+#define err_damaged_f	9
 
 // define commands
 #define clr_scr				system("cls");
 #define clr_char			printf(" ");
 #define clr_kbbuf			fflush(stdin);
-#define wait_kb				system("pause > null");
+#define wait_kb				getchar();	// system("pause > dmdat");
 #define set_window_default	MoveWindow(GetConsoleWindow(), window_pos_x, window_pos_y, window_width, window_hight, 1);
 //							MoveWindow(window_handle, x, y, width, height, redraw_window);
 

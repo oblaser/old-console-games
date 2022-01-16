@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		23.10.2015
+// Date:		24.10.2015
 //
 // Description:	Functions for Diamond Miner
 // 
@@ -11,11 +11,20 @@
 // includeing function.h
 #include "function.h"
 
-// define objects
+// coordinate objects
 coordinate x;
 coordinate y;
 
+// file management
+FILE * fp;
+
 /* --- variables --- */
+
+// save data
+unsigned int save_data[save_elements];
+
+// filename for save
+char save_file_name[file_name_len];
 
 // monster enable
 bool monster_a1_en;
@@ -253,7 +262,7 @@ unsigned int gotoxy(unsigned int f_goto_x, unsigned int f_goto_y) {
 unsigned int printxy(char f_string[], unsigned int f_print_x, unsigned int f_print_y) {
 
 	gotoxy(f_print_x, f_print_y);
-
+	
 	printf(f_string);
 
 	return 0;
@@ -317,6 +326,119 @@ unsigned int clr_dialog_box() {
 		for (y.draw = dialog_y0; y.draw < dialog_y0 + dialog_hight; y.draw++) {
 			printxy(" ", x.draw, y.draw);
 		}
+	}
+
+	return 0;
+}
+
+// error
+unsigned int error(unsigned int f_error_nr) {
+
+	while (1) {
+
+		clr_scr;
+
+		gotoxy(5, 5);
+		printf("Error %d", f_error_nr);
+		
+		printxy("Please contact the developper.", 5, 7);
+		
+		getchar();
+	}
+}
+
+/* --- extern files --- */
+
+unsigned int create_file(char f_file_name[]) {
+
+	if (f_file_name[0] != c_no_file) {
+
+		// fill data array
+		for (int i = 0; i < save_elements; i++) save_data[i] = 0;
+
+		// create file
+		if (fopen_s(&fp, f_file_name, "w") == 0) {
+
+			// write in file
+			if (fwrite(save_data, sizeof(int), save_elements, fp) != save_elements) error(err_create_f);
+
+			// close file
+			fclose(fp);
+		}
+		else error(err_open_f);
+	}
+
+	return 0;
+}
+
+unsigned int load_value(char f_value_name[], char f_file_name[]) {
+
+	if (f_file_name[0] != c_no_file) {
+
+		// open file to read
+		if (fopen_s(&fp, f_file_name, "r") == 0) {
+
+			// read file
+			if (fread(save_data, sizeof(int), save_elements, fp) != save_elements) error(err_read_f);
+
+			// close file
+			fclose(fp);
+		}
+		else {
+
+			create_file(f_file_name);
+
+			// open the new file to read
+			if (fopen_s(&fp, f_file_name, "r") == 0) {
+
+				// read file
+				if (fread(save_data, sizeof(int), save_elements, fp) != save_elements) error(err_read_f);
+
+				// close file
+				fclose(fp);
+			}
+			else {
+				error(err_read_f);
+			}
+		}
+
+		for (int i = 0; i < 4; i++) {
+			if (save_data[i] != save_data[i + 4] / 2) error(err_damaged_f);
+		}
+
+		if (f_value_name == "diamond") return save_data[0];
+		if (f_value_name == "TNT") return save_data[1];
+		if (f_value_name == "C4") return save_data[2];
+		if (f_value_name == "map") return save_data[3];
+		else error(err_value_name);
+	}
+
+	return 0;
+}
+
+unsigned int save_value(char f_file_name[]) {
+
+	if (f_file_name[0] != c_no_file) {
+
+		save_data[0] = cnt_diamond;
+		save_data[1] = cnt_TNT;
+		save_data[2] = cnt_C4;
+		save_data[3] = cnt_map;
+
+		for (int i = 0; i < 4; i++) {
+			save_data[i + 4] = save_data[i] * 2;
+		}
+
+		// open file
+		if (fopen_s(&fp, f_file_name, "w") == 0) {
+
+			// write in file
+			if (fwrite(save_data, sizeof(int), save_elements, fp) != save_elements) error(err_write_f);
+
+			// close file
+			fclose(fp);
+		}
+		else error(err_open_f);
 	}
 
 	return 0;
@@ -581,10 +703,6 @@ unsigned int print_pic_select(unsigned int f_pic, unsigned int f_print_x, unsign
 		print_pic_to_dig(f_print_x, f_print_y);
 		break;
 
-	case c_error:
-		print_pic_error(f_print_x, f_print_y);
-		break;
-
 	case c_slime:
 		print_pic_slime(f_print_x, f_print_y);
 		break;
@@ -599,6 +717,7 @@ unsigned int print_pic_select(unsigned int f_pic, unsigned int f_print_x, unsign
 
 	default:
 		print_pic_error(f_print_x, f_print_y);
+		error(err_pic);
 		break;
 	}
 
@@ -715,6 +834,9 @@ unsigned int set_default() {
 	// monster enable
 	monster_a1_en = 1;
 	monster_b1_en = 1;
+
+	// actual file
+	for (int i = 0; i < file_name_len; i++) save_file_name[i] = 0;
 
 	return 0;
 }
@@ -857,6 +979,9 @@ unsigned int page_game() {
 
 		printxy("Press Esc to view menu", dialog_x0 + 1, dialog_y0 + 1);
 
+		gotoxy(dialog_x0 + 1, dialog_y0 + dialog_hight - 4);
+		printf("Actual file: %s", save_file_name);
+
 		print_once_game = 0;
 	}
 	
@@ -873,6 +998,7 @@ unsigned int page_game() {
 	print_counters();
 
 	// print miner coordinates
+	
 	gotoxy(dialog_x0 + 1, dialog_y0 + dialog_hight - 1);
 	if (x.miner - 1 < 10) printf("X:  %d", x.miner - 1);
 	else printf("X: %d", x.miner - 1);
@@ -918,9 +1044,15 @@ unsigned int page_menu() {
 
 	printxy("Press R to restart", dialog_x0 + 1, dialog_y0 + 1);
 
-	printxy("Press A to view about", dialog_x0 + 1, dialog_y0 + 3);
+	printxy("Press S to save game", dialog_x0 + 1, dialog_y0 + 3);
 
-	printxy("Press X to exit", dialog_x0 + 1, dialog_y0 + 6);
+	printxy("Press L to load game", dialog_x0 + 1, dialog_y0 + 5);
+	
+	printxy("Press A to view about", dialog_x0 + 1, dialog_y0 + 8);
+
+	printxy("Press X to exit", dialog_x0 + 1, dialog_y0 + 10);
+
+	
 
 	printxy("Return with Esc", dialog_x0 + 1, dialog_y0 + dialog_hight - 1);
 
@@ -932,13 +1064,18 @@ unsigned int page_about() {
 
 	clr_dialog_box();
 
-	printxy("Move with arrow keys or WASD. Use TNT", dialog_x0 + 1, dialog_y0 + 1);
-	printxy("with Space and C4 with C. Enter the", dialog_x0 + 1, dialog_y0 + 2);
-	printxy("store with Enter. View map with M.", dialog_x0 + 1, dialog_y0 + 3);
+	gotoxy(dialog_x0 + 1, dialog_y0 + 1);
+	printf("Diamond Miner %s", release_version);
 
+	printxy("Move with arrow keys or WASD. Use TNT", dialog_x0 + 1, dialog_y0 + 3);
+	printxy("with Space and C4 with C. Enter the", dialog_x0 + 1, dialog_y0 + 4);
+	printxy("store with Enter. View map with M.", dialog_x0 + 1, dialog_y0 + 5);
 
-	printxy("Programmed in C++", dialog_x0 + 1, dialog_y0 + 7);
-	printxy("Sep. - Oct. 2015", dialog_x0 + 1, dialog_y0 + 8);
+	printxy("If you find all diamonds, you will", dialog_x0 + 1, dialog_y0 + 7);
+	printxy("win one C4.", dialog_x0 + 1, dialog_y0 + 8);
+
+	printxy("Programmed in C++", dialog_x0 + 1, dialog_y0 + 12);
+	printxy("Sep. - Nov. 2015", dialog_x0 + 1, dialog_y0 + 13);
 
 	//printxy("", dialog_x0 + 1, dialog_y0 + 0);
 
@@ -1026,15 +1163,64 @@ unsigned int page_map() {
 // congratulation
 unsigned int page_congratulation() {
 
+	MoveWindow(GetConsoleWindow(), window_pos_x, window_pos_y, 545, 560, 1);
+
+	cnt_C4 += 1;
+
+	if (save_file_name[0] == 0) save_file_name[0] = 'x';
+
+	save_value(save_file_name);
+
 	clr_scr;
 
 	printxy("Congratulation!", 24, 2);
-	printxy("You've found all diamonds", 19, 4);
+	printxy("You've found all diamonds and won one C4", 19, 4);
 	
 	print_pic_diamond_big(23, 6);
 
 	printxy("Press X to exit", 3, 25);
 	printxy("Press R to restart", 3, 27);
+
+	gotoxy(3, 30);
+	printf("Progress saved in file %s", save_file_name);
+
+	return 0;
+}
+
+// load
+unsigned int page_load() {
+
+	clr_dialog_box();
+
+	printxy("Load file:", dialog_x0 + 1, dialog_y0 + 1);
+
+	printxy("Confirm with Enter", dialog_x0 + 1, dialog_y0 + 3);
+
+	printxy("Current progress will be lost!", dialog_x0 + 1, dialog_y0 + 5);
+
+	//printxy("", dialog_x0 + 1, dialog_y0 + 0);
+
+	gotoxy(dialog_x0 + 1, dialog_y0 + dialog_hight - 1);
+	printf("Return by enter %c", c_no_file);
+
+	return 0;
+}
+
+// save
+unsigned int page_save() {
+
+	clr_dialog_box();
+
+	printxy("Save to file:", dialog_x0 + 1, dialog_y0 + 1);
+	gotoxy(dialog_x0 + 1, dialog_y0 + 2);
+	printf("(max. %d letters)", file_name_len - 1);
+
+	printxy("Confirm with Enter", dialog_x0 + 1, dialog_y0 + 4);
+
+	//printxy("", dialog_x0 + 1, dialog_y0 + 0);
+
+	gotoxy(dialog_x0 + 1, dialog_y0 + dialog_hight - 1);
+	printf("Return by enter %c", c_no_file);
 
 	return 0;
 }
@@ -1078,13 +1264,16 @@ unsigned int print() {
 		page_map();
 		break;
 
+	case 'load':
+		page_load();
+		break;
+
+	case 'save':
+		page_save();
+		break;
+
 	default:
-		while (1) {
-			gotoxy(5, 5);
-			printf("Fatal error %d", error_c_print);
-			printxy("Please contact the developper.", 5, 7);
-			getchar();
-		}
+		error(err_print);
 		break;
 	}
 
@@ -1175,6 +1364,55 @@ unsigned int HID_store() {
 	return 0;
 }
 
+unsigned int HID_load() {
+
+	char f_file_name[file_name_len];
+
+	gotoxy(dialog_x0 + 12, dialog_y0 + 1);
+	set_cursor(1, cursor_hight);
+
+	scanf_s("%s", f_file_name);
+
+	set_cursor(0, cursor_hight);
+
+	if (f_file_name[0] != c_no_file) {
+
+		for (int i = 0; i < file_name_len; i++) save_file_name[i] = f_file_name[i];
+
+		cnt_diamond = load_value("diamond", f_file_name);
+		cnt_TNT = load_value("TNT", f_file_name);
+		cnt_C4 = load_value("C4", f_file_name);
+		cnt_map = load_value("map", f_file_name);
+	}
+
+	print_counters();
+
+	page = 'menu';
+
+	return 0;
+}
+
+unsigned int HID_save() {
+
+	char f_file_name[file_name_len];
+
+	gotoxy(dialog_x0 + 15, dialog_y0 + 1);
+	set_cursor(1, cursor_hight);
+
+	scanf_s("%s", f_file_name);
+
+	set_cursor(0, cursor_hight);
+
+	if (f_file_name[0] != c_no_file)
+		for (int i = 0; i < file_name_len; i++) save_file_name[i] = f_file_name[i];
+
+	save_value(f_file_name);
+
+	page = 'menu';
+
+	return 0;
+}
+
 /* --- read HID --- */
 
 // read HID
@@ -1183,7 +1421,8 @@ unsigned int read_HID() {
 	// read kbbutton
 
 	clr_kbbuf;
-	kbbut = _getch();
+	if (page != 'save' && page != 'load')
+		kbbut = _getch();
 	
 	if (page != 'game') print_once_game = 1;
 
@@ -1243,6 +1482,12 @@ unsigned int read_HID() {
 		// exit
 		if (kbbut == but_exit) return ret_exit;
 
+		// load
+		if (kbbut == but_load) page = 'load';
+
+		// save
+		if (kbbut == but_save) page = 'save';
+
 		break;
 
 	case 'abot':
@@ -1276,13 +1521,16 @@ unsigned int read_HID() {
 		page = 'game';
 		break;
 
+	case 'load':
+		HID_load();
+		break;
+
+	case 'save':
+		HID_save();
+		break;
+
 	default:
-		while (1) {
-			gotoxy(5, 5);
-			printf("Fatal error %d", error_c_r_HID);
-			printxy("Please contact the developper.", 5, 7);
-			getchar();
-		}
+		error(err_read_HID);
 		break;
 	}
 

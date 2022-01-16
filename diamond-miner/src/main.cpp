@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		23.10.2015
+// Date:		24.10.2015
 //
 // Description:	Mainfile of Diamond Miner
 // 
@@ -28,6 +28,8 @@ int main() {
 		do {
 
 			print();
+
+			Sleep(50);
 
 			loop_cond = read_HID();
 			if (loop_cond == ret_game) {

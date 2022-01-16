@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		23.10.2015
+// Date:		24.10.2015
 //
 // Description:	Functions for Diamond Miner
 // 
@@ -46,6 +46,17 @@ unsigned int convert_kb_dec(unsigned char f_kbbut);
 
 // clear dialog box
 unsigned int clr_dialog_box();
+
+// error
+unsigned int error(unsigned int f_error_nr);
+
+/* --- extern files --- */
+
+unsigned int create_file(char f_file_name[]);
+
+unsigned int load_value(char f_value_name[], char f_file_name[]);
+
+unsigned int save_value(char f_file_name[]);
 
 /* --- print pics --- */
 
@@ -126,6 +137,12 @@ unsigned int page_map();
 // congratulation
 unsigned int page_congratulation();
 
+// load
+unsigned int page_load();
+
+// save
+unsigned int page_save();
+
 /* --- print --- */
 
 unsigned int print();
@@ -139,6 +156,10 @@ unsigned int HID_TNT();
 unsigned int HID_C4();
 
 unsigned int HID_store();
+
+unsigned int HID_load();
+
+unsigned int HID_save();
 
 /* --- read HID --- */
 
