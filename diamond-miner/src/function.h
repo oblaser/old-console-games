@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		05.10.2015
+// Date:		23.10.2015
 //
 // Description:	Functions for Diamond Miner
 // 
@@ -47,11 +47,6 @@ unsigned int convert_kb_dec(unsigned char f_kbbut);
 // clear dialog box
 unsigned int clr_dialog_box();
 
-/* --- default --- */
-
-// set values to default
-unsigned int set_default();
-
 /* --- print pics --- */
 
 unsigned int print_pic_monster_big(unsigned int f_print_x, unsigned int f_print_y);
@@ -82,15 +77,26 @@ unsigned int print_pic_diamond(unsigned int f_print_x, unsigned int f_print_y);
 
 unsigned int print_pic_error(unsigned int f_print_x, unsigned int f_print_y);
 
-unsigned int print_pic_to_explore(unsigned int f_print_x, unsigned int f_print_y);
+unsigned int print_pic_to_dig(unsigned int f_print_x, unsigned int f_print_y);
 
 unsigned int print_pic_slime(unsigned int f_print_x, unsigned int f_print_y);
 
 unsigned int print_pic_C4(unsigned int f_print_x, unsigned int f_print_y);
 
+unsigned int print_pic_map(unsigned int f_print_x, unsigned int f_print_y);
+
 unsigned int print_pic_select(unsigned int f_pic, unsigned int f_print_x, unsigned int f_print_y);
 
+unsigned int print_counters();
+
+unsigned int print_border();
+
 // unsigned int print_pic_(unsigned int f_print_x, unsigned int f_print_y);
+
+/* --- default --- */
+
+// set values to default
+unsigned int set_default();
 
 /* --- create --- */
 
@@ -114,8 +120,15 @@ unsigned int page_about();
 // store
 unsigned int page_store();
 
+// map
+unsigned int page_map();
+
 // congratulation
 unsigned int page_congratulation();
+
+/* --- print --- */
+
+unsigned int print();
 
 /* --- functions in read_HID --- */
 
@@ -134,10 +147,6 @@ unsigned int read_HID();
 /* --- set positions --- */
 
 unsigned int set_positions();
-
-/* --- print --- */
-
-unsigned int print();
 
 /* --- monster move --- */
 

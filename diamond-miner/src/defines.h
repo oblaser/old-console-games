@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		05.10.2015
+// Date:		23.10.2015
 //
 // Description:	Defines for Diamond Miner
 // 
@@ -10,17 +10,11 @@
 
 #ifndef defines_h
 
-// define commands
-#define clr_scr		system("cls");
-#define clr_char	printf(" ");
-#define clr_kbbuf	fflush(stdin);
-#define wait_kb		system("pause > null");
-
 // window
 #define window_width	545
 #define window_hight	450
-#define window_pos_x	100
-#define window_pos_y	100
+#define window_pos_x	50
+#define window_pos_y	50
 
 // cursor
 #define cursor_hight	10
@@ -46,7 +40,7 @@
 #define c_C4			184
 
 #define c_wall			219
-#define c_to_explore	176
+#define c_to_dig		176
 #define c_way			32
 #define c_slime			126
 
@@ -74,11 +68,12 @@
 #define but_esc			0x1B
 #define but_space		0x20
 
-#define but_menu		0x6D	// m
+#define but_menu		but_esc
 #define but_restart		0x72	// r
 #define but_exit		0x78	// x
 #define but_store		but_enter
 #define but_about		0x61	// a
+#define but_map			0x6D	// m
 
 #define but_TNT			but_space
 #define but_C4			0x63	// c
@@ -90,6 +85,9 @@
 #define price_C4		3
 #define number_C4		1
 
+#define price_map		5
+#define number_map		1
+
 // return values
 #define ret_exit		1
 #define ret_restart		2
@@ -99,18 +97,13 @@
 #define error_c_print	001
 #define error_c_r_HID	002
 
+// define commands
+#define clr_scr				system("cls");
+#define clr_char			printf(" ");
+#define clr_kbbuf			fflush(stdin);
+#define wait_kb				system("pause > null");
+#define set_window_default	MoveWindow(GetConsoleWindow(), window_pos_x, window_pos_y, window_width, window_hight, 1);
+//							MoveWindow(window_handle, x, y, width, height, redraw_window);
+
 #define defines_h
 #endif
-
-/*
-Sounds:
-
-C:\Windows\Media
-ir_end		monster
-tada		congratulations
-
-C:\Windows\Media\Garden
-Ping		diamond
-
-
-*/

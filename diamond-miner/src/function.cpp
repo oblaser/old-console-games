@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		05.10.2015
+// Date:		23.10.2015
 //
 // Description:	Functions for Diamond Miner
 // 
@@ -34,6 +34,7 @@ unsigned char kbbut;
 unsigned int cnt_diamond;
 unsigned int cnt_TNT;
 unsigned int cnt_C4;
+unsigned int cnt_map;
 
 unsigned int total_diamond;
 
@@ -176,8 +177,8 @@ unsigned char pic_error[3][3] = {
 	{ 33,  33,  33 }
 };
 
-// to explore
-unsigned char pic_to_explore[3][3] = {
+// to dig
+unsigned char pic_to_dig[3][3] = {
 	{ 176, 176, 176 },
 	{ 176, 176, 176 },
 	{ 176, 176, 176 }
@@ -195,6 +196,13 @@ unsigned char pic_C4[3][3] = {
 	{ 35,  35,  35 },
 	{ 35,  67,  52 },
 	{ 35,  35,  35 }
+};
+
+// map 
+unsigned char pic_map[3][3] = {
+	{ 195, 194, 196 },
+	{ 192, 197, 191 },
+	{ 218, 217, 179 }
 };
 
 /*
@@ -310,49 +318,6 @@ unsigned int clr_dialog_box() {
 			printxy(" ", x.draw, y.draw);
 		}
 	}
-
-	return 0;
-}
-
-/* --- default --- */
-
-// set values to default
-unsigned int set_default() {
-
-	// turn off cursor
-	set_cursor(0, cursor_hight);
-
-	// set color
-	//system("color 06");
-
-	// window size and position
-	MoveWindow(GetConsoleWindow(), window_pos_x, window_pos_y, window_width, window_hight, 1);
-	//MoveWindow(window_handle, x, y, width, height, redraw_window);
-
-	// page default
-	page = 'star';
-
-	// print once
-	print_once_game = 1;
-
-	// miner position
-	x.start_pos = field_width / 2;
-	y.start_pos = field_hight / 2;
-
-	x.miner = x.start_pos;
-	y.miner = y.start_pos;
-
-	// set window title
-	system("title Diamond Miner");
-
-	// clear counters
-	cnt_diamond = 0;
-	cnt_TNT = 0;
-	cnt_C4 = 0;
-
-	// monster enable
-	monster_a1_en = 1;
-	monster_b1_en = 1;
 
 	return 0;
 }
@@ -527,12 +492,12 @@ unsigned int print_pic_error(unsigned int f_print_x, unsigned int f_print_y) {
 	return 0;
 }
 
-unsigned int print_pic_to_explore(unsigned int f_print_x, unsigned int f_print_y) {
+unsigned int print_pic_to_dig(unsigned int f_print_x, unsigned int f_print_y) {
 
 	for (y.draw = 0; y.draw < 3; y.draw++) {
 		for (x.draw = 0; x.draw < 3; x.draw++) {
 			gotoxy(x.draw + f_print_x, y.draw + f_print_y);
-			printf("%c", pic_to_explore[y.draw][x.draw]);
+			printf("%c", pic_to_dig[y.draw][x.draw]);
 		}
 	}
 
@@ -557,6 +522,18 @@ unsigned int print_pic_C4(unsigned int f_print_x, unsigned int f_print_y) {
 		for (x.draw = 0; x.draw < 3; x.draw++) {
 			gotoxy(x.draw + f_print_x, y.draw + f_print_y);
 			printf("%c", pic_C4[y.draw][x.draw]);
+		}
+	}
+
+	return 0;
+}
+
+unsigned int print_pic_map(unsigned int f_print_x, unsigned int f_print_y) {
+
+	for (y.draw = 0; y.draw < 3; y.draw++) {
+		for (x.draw = 0; x.draw < 3; x.draw++) {
+			gotoxy(x.draw + f_print_x, y.draw + f_print_y);
+			printf("%c", pic_map[y.draw][x.draw]);
 		}
 	}
 
@@ -600,8 +577,8 @@ unsigned int print_pic_select(unsigned int f_pic, unsigned int f_print_x, unsign
 		print_pic_way(f_print_x, f_print_y);
 		break;
 
-	case c_to_explore:
-		print_pic_to_explore(f_print_x, f_print_y);
+	case c_to_dig:
+		print_pic_to_dig(f_print_x, f_print_y);
 		break;
 
 	case c_error:
@@ -642,6 +619,103 @@ unsigned int print_counters() {
 	if (cnt_C4 < 10) printf("%d%c", cnt_C4, c_border_hor);
 	else printf("%d", cnt_C4);
 
+	gotoxy(16, 19);
+	if (cnt_map < 10) printf("%d%c", cnt_map, c_border_hor);
+	else printf("%d", cnt_map);
+
+	return 0;
+}
+
+unsigned int print_border() {
+
+	for (x.draw = 0; x.draw < 100; x.draw++) {
+		for (y.draw = 0; y.draw < 25; y.draw++) {
+
+			gotoxy(x.draw, y.draw);
+
+			// corner
+			if ((y.draw == 1 && (x.draw == 2 || x.draw == 18 || x.draw == 21 || x.draw == 60)) ||
+				(y.draw == 17 && (x.draw == 2 || x.draw == 18)) ||
+				(y.draw == 19 && (x.draw == 2 || x.draw == 6 || x.draw == 10 || x.draw == 14 || x.draw == 18)) ||
+				(y.draw == 23 && (x.draw == 2 || x.draw == 6 || x.draw == 10 || x.draw == 14 || x.draw == 18 || x.draw == 21 || x.draw == 60))
+				) {
+
+				printf("%c", c_corner);
+			}
+
+			// border horizontal
+			if ((y.draw == 1 && ((x.draw > 2 && x.draw < 18) || (x.draw > 21 && x.draw < 60))) ||
+				(y.draw == 17 && (x.draw > 2 && x.draw < 18)) ||
+				(y.draw == 19 && ((x.draw > 2 && x.draw < 6) || (x.draw > 6 && x.draw < 10) || (x.draw > 10 && x.draw < 14) || (x.draw > 14 && x.draw < 18))) ||
+				(y.draw == 23 && ((x.draw > 2 && x.draw < 6) || (x.draw > 6 && x.draw < 10) || (x.draw > 10 && x.draw < 14) || (x.draw > 14 && x.draw < 18) || (x.draw > 21 && x.draw < 60)))
+				) {
+
+				printf("%c", c_border_hor);
+			}
+
+			// border vertical
+			if ((x.draw == 2 && ((y.draw >  1 && y.draw < 17) || (y.draw > 19 && y.draw < 23))) ||
+				(x.draw == 6 && (y.draw > 19 && y.draw < 23)) ||
+				(x.draw == 10 && (y.draw > 19 && y.draw < 23)) ||
+				(x.draw == 14 && (y.draw > 19 && y.draw < 23)) ||
+				(x.draw == 18 && ((y.draw >  1 && y.draw < 17) || (y.draw > 19 && y.draw < 23))) ||
+				(x.draw == 21 && (y.draw >  1 && y.draw < 23)) ||
+				(x.draw == 60 && (y.draw >  1 && y.draw < 23))
+				) {
+
+				printf("%c", c_border_ver);
+			}
+		}
+	}
+
+	print_pic_diamond(3, 20);
+	print_pic_TNT(7, 20);
+	print_pic_C4(11, 20);
+	print_pic_map(15, 20);
+
+	return 0;
+}
+
+/* --- default --- */
+
+// set values to default
+unsigned int set_default() {
+
+	// turn off cursor
+	set_cursor(0, cursor_hight);
+
+	// set color
+	//system("color 06");
+
+	// window size and position
+	set_window_default;
+
+	// page default
+	page = 'star';
+
+	// print once
+	print_once_game = 1;
+
+	// miner position
+	x.start_pos = field_width / 2;
+	y.start_pos = field_hight / 2;
+
+	x.miner = x.start_pos;
+	y.miner = y.start_pos;
+
+	// set window title
+	system("title Diamond Miner");
+
+	// clear counters
+	cnt_diamond = 0;
+	cnt_TNT = 0;
+	cnt_C4 = 0;
+	cnt_map = 0;
+
+	// monster enable
+	monster_a1_en = 1;
+	monster_b1_en = 1;
+
 	return 0;
 }
 
@@ -655,10 +729,10 @@ unsigned int create_field() {
 	time(&f_rand);
 	srand((unsigned int)f_rand);
 
-	// to explore
+	// to dig
 	for (x.draw = 0; x.draw < field_width; x.draw++) {
 		for (y.draw = 0; y.draw < field_hight; y.draw++) {
-			field[x.draw][y.draw] = c_to_explore;
+			field[x.draw][y.draw] = c_to_dig;
 		}
 	}
 
@@ -676,26 +750,24 @@ unsigned int create_field() {
 	x.monster_a1 = rand() % (field_width - 3) + 2;
 	y.monster_a1 = rand() % (field_hight - 3) + 2;
 
-	if (x.monster_a1 < 2) x.monster_a1 += 2;
-	if (x.monster_a1 > field_width - 3) x.monster_a1 -= 2;
-	if (y.monster_a1 < 2) y.monster_a1 += 2;
-	if (y.monster_a1 > field_hight - 3) x.monster_a1 -= 2;
-
 	field[x.monster_a1][y.monster_a1] = c_monster_a1;
 
 	x.monster_b1 = rand() % (field_width - 3) + 2;
 	y.monster_b1 = rand() % (field_hight - 3) + 2;
 
-	if (x.monster_b1 < 2) x.monster_b1 += 2;
-	if (x.monster_b1 > field_width - 3) x.monster_b1 -= 2;
-	if (y.monster_b1 < 2) y.monster_b1 += 2;
-	if (y.monster_b1 > field_hight - 3) x.monster_b1 -= 2;
-
 	field[x.monster_b1][y.monster_b1] = c_monster_b1;
 
 	// random diamond
+	unsigned int f_x_diamond;
+	unsigned int f_y_diamond;
+
 	for (int i = 0; i < (field_hight * field_width / 1000 * tousnd_diamond); i++) {
-		field[rand() % (field_width - 3) + 2][rand() % (field_hight - 3) + 2] = c_diamond;
+
+		f_x_diamond = rand() % (field_width - 3) + 2;
+		f_y_diamond = rand() % (field_hight - 3) + 2;
+
+		if (field[f_x_diamond][f_y_diamond] != c_monster_a1 && field[f_x_diamond][f_y_diamond] != c_monster_b1)
+			field[f_x_diamond][f_y_diamond] = c_diamond;
 	}
 
 	// vertical border
@@ -725,7 +797,7 @@ unsigned int create_field() {
 	for (x.draw = x.start_pos - 1; x.draw <= x.start_pos + 1; x.draw++) {
 		for (y.draw = y.start_pos - 1; y.draw <= y.start_pos + 1; y.draw++) {
 			if (field[x.draw][y.draw] == c_wall && x.start_pos > 2 && x.start_pos < field_width - 3 && y.start_pos > 2 && y.start_pos < field_hight - 3)
-				field[x.draw][y.draw] = c_to_explore;
+				field[x.draw][y.draw] = c_to_dig;
 		}
 	}
 
@@ -752,15 +824,6 @@ unsigned int page_start() {
 
 	clr_scr;
 
-	/*
-	for (x.draw = 0; x.draw < 45; x.draw++) {
-		for (y.draw = 0; y.draw < 25; y.draw++) {
-			gotoxy(x.draw, y.draw);
-			printf("%c", 176);
-		}
-	}
-	*/
-
 	print_pic_diamond_text(4, 1);
 	print_pic_miner_text(37, 1);
 
@@ -775,50 +838,7 @@ unsigned int page_start() {
 
 	clr_scr;
 
-	// draw borders
-	for (x.draw = 0; x.draw < 100; x.draw++) {
-		for (y.draw = 0; y.draw < 25; y.draw++) {
-			
-			gotoxy(x.draw, y.draw);
-			
-			// corner
-			if ((y.draw ==  1 && (x.draw == 2 || x.draw == 18 || x.draw == 21 || x.draw == 60)) ||
-				(y.draw == 17 && (x.draw == 2 || x.draw == 18)) ||
-				(y.draw == 19 && (x.draw == 2 || x.draw ==  6 || x.draw == 10 || x.draw == 14)) ||
-				(y.draw == 23 && (x.draw == 2 || x.draw ==  6 || x.draw == 10 || x.draw == 14 || x.draw == 21 || x.draw == 60))
-				) {
-
-				printf("%c", c_corner);
-			}
-
-			// border horizontal
-			if ((y.draw ==  1 && ((x.draw > 2 && x.draw < 18) || (x.draw > 21 && x.draw < 60))) ||
-				(y.draw == 17 && ( x.draw > 2 && x.draw < 18)) ||
-				(y.draw == 19 && ((x.draw > 2 && x.draw < 6) || (x.draw > 6 && x.draw < 10) || (x.draw > 10 && x.draw < 14))) ||
-				(y.draw == 23 && ((x.draw > 2 && x.draw < 6) || (x.draw > 6 && x.draw < 10) || (x.draw > 10 && x.draw < 14) || (x.draw > 21 && x.draw < 60)))
-				) {
-
-				printf("%c", c_border_hor);
-			}
-
-			// border vertical
-			if ((x.draw ==  2 && ((y.draw >  1 && y.draw < 17) || (y.draw > 19 && y.draw < 23))) ||
-				(x.draw ==  6 && ( y.draw > 19 && y.draw < 23)) ||
-				(x.draw == 10 && ( y.draw > 19 && y.draw < 23)) ||
-				(x.draw == 14 && (y.draw > 19 && y.draw < 23)) ||
-				(x.draw == 18 && ( y.draw >  1 && y.draw < 17)) ||
-				(x.draw == 21 && ( y.draw >  1 && y.draw < 23)) ||
-				(x.draw == 60 && ( y.draw >  1 && y.draw < 23))
-				) {
-
-				printf("%c", c_border_ver);
-			}
-		}
-	}
-
-	print_pic_diamond(3, 20);
-	print_pic_TNT(7, 20);
-	print_pic_C4(11, 20);
+	print_border();
 
 	page = 'game';
 	
@@ -831,9 +851,11 @@ unsigned int page_game() {
 	// print once
 	if (print_once_game) {
 
-		clr_dialog_box();
+		clr_scr;
 
-		printxy("Press M to view menu", dialog_x0 + 1, dialog_y0 + 1);
+		print_border();
+
+		printxy("Press Esc to view menu", dialog_x0 + 1, dialog_y0 + 1);
 
 		print_once_game = 0;
 	}
@@ -856,8 +878,8 @@ unsigned int page_game() {
 	else printf("X: %d", x.miner - 1);
 
 	gotoxy(dialog_x0 + 8, dialog_y0 + dialog_hight - 1);
-	if (y.miner - 1 < 10) printf("Y:  %d", y.miner - 1);
-	else printf("Y: %d", y.miner - 1);
+	if ((field_hight - 4) - (y.miner - 2) < 10) printf("Y:  %d", (field_hight - 4) - (y.miner - 2));
+	else printf("Y: %d", (field_hight - 4) - (y.miner - 2));
 
 	// to scroll left
 	printxy(" ", 0, 0);
@@ -910,13 +932,13 @@ unsigned int page_about() {
 
 	clr_dialog_box();
 
-	printxy("Move with arrow keys. Use TNT with", dialog_x0 + 1, dialog_y0 + 1);
-	printxy("Space and C4 with C. Enter the store", dialog_x0 + 1, dialog_y0 + 2);
-	printxy("with Enter.", dialog_x0 + 1, dialog_y0 + 3);
+	printxy("Move with arrow keys or WASD. Use TNT", dialog_x0 + 1, dialog_y0 + 1);
+	printxy("with Space and C4 with C. Enter the", dialog_x0 + 1, dialog_y0 + 2);
+	printxy("store with Enter. View map with M.", dialog_x0 + 1, dialog_y0 + 3);
 
 
-	printxy("Programmed in Sep. - Oct. 2015.", dialog_x0 + 1, dialog_y0 + 7);
-	printxy("The C++ code is over 1600 lines big.", dialog_x0 + 1, dialog_y0 + 8);
+	printxy("Programmed in C++", dialog_x0 + 1, dialog_y0 + 7);
+	printxy("Sep. - Oct. 2015", dialog_x0 + 1, dialog_y0 + 8);
 
 	//printxy("", dialog_x0 + 1, dialog_y0 + 0);
 
@@ -961,12 +983,42 @@ unsigned int page_store() {
 	gotoxy(dialog_x0 + 20, dialog_y0 + f_line);
 	printf("%dx diamond", price_C4);
 
+	// 3 map
+	f_line = 5;
+
+	printxy("3", dialog_x0 + 1, dialog_y0 + f_line);
+
+	gotoxy(dialog_x0 + 6, dialog_y0 + f_line);
+	printf("%dx map", number_map);
+
+	gotoxy(dialog_x0 + 20, dialog_y0 + f_line);
+	printf("%dx diamond", price_map);
+
 	// instructions
 	printxy("Enter the number you want to buy", dialog_x0 + 1, dialog_y0 + dialog_hight - 3);
 
 	printxy("Return with Esc", dialog_x0 + 1, dialog_y0 + dialog_hight - 1);
 
 	print_counters();
+
+	return 0;
+}
+
+// map
+unsigned int page_map() {
+
+	clr_scr;
+
+	for (x.draw = 0; x.draw < field_width; x.draw++) {
+		for (y.draw = 0; y.draw < field_hight; y.draw++) {
+			gotoxy(x.draw + 5, y.draw + 1);
+
+			if (field[x.draw][y.draw] == c_way) printf("%c", c_way);
+			if (field[x.draw][y.draw] == c_wall) printf("%c", c_wall);
+			if (field[x.draw][y.draw] == c_miner) printf("%c", c_miner);
+			else printf("%c", c_to_dig);
+		}
+	}
 
 	return 0;
 }
@@ -987,27 +1039,79 @@ unsigned int page_congratulation() {
 	return 0;
 }
 
+/* --- print --- */
+
+// print page
+unsigned int print() {
+
+	// set window size
+	if (page == 'map') MoveWindow(GetConsoleWindow(), window_pos_x, window_pos_y, 545, 950, 1);
+	else set_window_default;
+
+	switch (page) {
+
+	case 'star':
+		page_start();
+		break;
+
+	case 'game':
+		page_game();
+		break;
+
+	case 'menu':
+		page_menu();
+		break;
+
+	case 'abot':
+		page_about();
+		break;
+
+	case 'stor':
+		page_store();
+		break;
+
+	case 'cong':
+		page_congratulation();
+		break;
+
+	case 'map':
+		page_map();
+		break;
+
+	default:
+		while (1) {
+			gotoxy(5, 5);
+			printf("Fatal error %d", error_c_print);
+			printxy("Please contact the developper.", 5, 7);
+			getchar();
+		}
+		break;
+	}
+
+	return 0;
+}
+
 /* --- functions in read_HID --- */
 
 unsigned int HID_move_miner() {
 
 	// up
-	if (kbbut == but_up) {
+	if (kbbut == but_up || kbbut == 'w') {
 		if (y.miner > 1 && field[x.miner][y.miner - 1] != c_wall) y.miner--;
 	}
 
 	// down
-	if (kbbut == but_down) {
+	if (kbbut == but_down || kbbut == 's') {
 		if (y.miner < field_hight - 2 && field[x.miner][y.miner + 1] != c_wall) y.miner++;
 	}
 
 	// right
-	if (kbbut == but_right) {
+	if (kbbut == but_right || kbbut == 'd') {
 		if (x.miner < field_width - 2 && field[x.miner + 1][y.miner] != c_wall) x.miner++;
 	}
 
 	// left
-	if (kbbut == but_left) {
+	if (kbbut == but_left || kbbut == 'a') {
 		if (x.miner > 1 && field[x.miner - 1][y.miner] != c_wall) x.miner--;
 	}
 
@@ -1063,6 +1167,11 @@ unsigned int HID_store() {
 		cnt_C4 += number_C4;
 	}
 
+	if (convert_kb_dec(kbbut) == 3 && cnt_diamond >= price_map) {
+		cnt_diamond -= price_map;
+		cnt_map += number_map;
+	}
+
 	return 0;
 }
 
@@ -1076,6 +1185,8 @@ unsigned int read_HID() {
 	clr_kbbuf;
 	kbbut = _getch();
 	
+	if (page != 'game') print_once_game = 1;
+
 	switch (page) {
 
 	case 'game':
@@ -1091,6 +1202,12 @@ unsigned int read_HID() {
 		// C4
 		if (kbbut == but_C4 && cnt_C4 > 0) {
 			HID_C4();
+		}
+
+		// view map
+		if (kbbut == but_map && cnt_map > 0) {
+			cnt_map--;
+			page = 'map';
 		}
 
 		// menu
@@ -1113,8 +1230,6 @@ unsigned int read_HID() {
 		break;
 
 	case 'menu':
-
-		print_once_game = 1;
 		
 		// return
 		if (kbbut == but_esc) page = 'game';
@@ -1132,16 +1247,12 @@ unsigned int read_HID() {
 
 	case 'abot':
 
-		print_once_game = 1;
-
 		// return
 		if (kbbut == but_esc) page = 'menu';
 
 		break;
 
 	case 'stor':
-
-		print_once_game = 1;
 
 		// buy
 		HID_store();
@@ -1153,14 +1264,16 @@ unsigned int read_HID() {
 
 	case 'cong':
 
-		print_once_game = 1;
-
 		// restart
 		if (kbbut == but_restart) return ret_restart;
 
 		// exit
 		if (kbbut == but_exit) return ret_exit;
 
+		break;
+
+	case 'map':
+		page = 'game';
 		break;
 
 	default:
@@ -1237,56 +1350,28 @@ unsigned int set_positions() {
 		if (field[x.miner + 1][y.miner] == c_miner) field[x.miner + 1][y.miner] = c_way;
 		break;
 
+	case 'w':
+		if (field[x.miner][y.miner + 1] == c_miner) field[x.miner][y.miner + 1] = c_way;
+		break;
+
+	case 's':
+		if (field[x.miner][y.miner - 1] == c_miner) field[x.miner][y.miner - 1] = c_way;
+		break;
+
+	case 'd':
+		if (field[x.miner - 1][y.miner] == c_miner) field[x.miner - 1][y.miner] = c_way;
+		break;
+
+	case 'a':
+		if (field[x.miner + 1][y.miner] == c_miner) field[x.miner + 1][y.miner] = c_way;
+		break;
+
 	default:
 		break;
 	}
 	
 	// set miner
 	field[x.miner][y.miner] = c_miner;
-
-	return 0;
-}
-
-/* --- print --- */
-
-// print page
-unsigned int print() {
-
-	switch (page) {
-
-	case 'star':
-		page_start();
-		break;
-
-	case 'game':
-		page_game();
-		break;
-
-	case 'menu':
-		page_menu();
-		break;
-
-	case 'abot':
-		page_about();
-		break;
-
-	case 'stor':
-		page_store();
-		break;
-
-	case 'cong':
-		page_congratulation();
-		break;
-
-	default:
-		while (1) {
-			gotoxy(5, 5);
-			printf("Fatal error %d", error_c_print);
-			printxy("Please contact the developper.", 5, 7);
-			getchar();
-		}
-		break;
-	}
 
 	return 0;
 }
@@ -1303,26 +1388,33 @@ unsigned int move_monster_a1() {
 	// clear old monster
 	if (monster_a1_en) field[x.monster_a1][y.monster_a1] = c_slime;
 
+	// move x or y
 	if (rand() % 100 + 1 > 50) {
 
+		// move + or -
 		if (rand() % 100 + 1 > 50) {
 			if (field[x.monster_a1 + 1][y.monster_a1] != c_wall && field[x.monster_a1 + 1][y.monster_a1] != c_diamond &&
-				field[x.monster_a1 + 1][y.monster_a1] != c_TNT && field[x.monster_a1 + 1][y.monster_a1] != c_store) x.monster_a1++;
+				field[x.monster_a1 + 1][y.monster_a1] != c_TNT && field[x.monster_a1 + 1][y.monster_a1] != c_store &&
+				x.monster_a1 < field_width - 3) x.monster_a1++;
 		}
 		else {
 			if (field[x.monster_a1 - 1][y.monster_a1] != c_wall && field[x.monster_a1 - 1][y.monster_a1] != c_diamond &&
-				field[x.monster_a1 - 1][y.monster_a1] != c_TNT && field[x.monster_a1 - 1][y.monster_a1] != c_store) x.monster_a1--;
+				field[x.monster_a1 - 1][y.monster_a1] != c_TNT && field[x.monster_a1 - 1][y.monster_a1] != c_store &&
+				x.monster_a1 > 2) x.monster_a1--;
 		}
 	}
 	else {
 
+		// move + or -
 		if (rand() % 100 + 1 > 50) {
 			if (field[x.monster_a1][y.monster_a1 + 1] != c_wall && field[x.monster_a1][y.monster_a1 + 1] != c_diamond &&
-				field[x.monster_a1][y.monster_a1 + 1] != c_TNT && field[x.monster_a1][y.monster_a1 + 1] != c_store) y.monster_a1++;
+				field[x.monster_a1][y.monster_a1 + 1] != c_TNT && field[x.monster_a1][y.monster_a1 + 1] != c_store &&
+				y.monster_a1 < field_hight - 3) y.monster_a1++;
 		}
 		else {
 			if (field[x.monster_a1][y.monster_a1 - 1] != c_wall && field[x.monster_a1][y.monster_a1 - 1] != c_diamond &&
-				field[x.monster_a1][y.monster_a1 - 1] != c_TNT && field[x.monster_a1][y.monster_a1 - 1] != c_store) y.monster_a1--;
+				field[x.monster_a1][y.monster_a1 - 1] != c_TNT && field[x.monster_a1][y.monster_a1 - 1] != c_store &&
+				y.monster_a1 > 2) y.monster_a1--;
 		}
 	}
 
@@ -1339,26 +1431,33 @@ unsigned int move_monster_b1() {
 	// clear old monster
 	if (monster_b1_en) field[x.monster_b1][y.monster_b1] = c_slime;
 
+	// move x or y
 	if (rand() % 100 + 1 > 50) {
 
+		// move + or -
 		if (rand() % 100 + 1 > 50) {
 			if (field[x.monster_b1 + 1][y.monster_b1] != c_wall && field[x.monster_b1 + 1][y.monster_b1] != c_diamond &&
-				field[x.monster_b1 + 1][y.monster_b1] != c_TNT && field[x.monster_b1 + 1][y.monster_b1] != c_store) x.monster_b1++;
+				field[x.monster_b1 + 1][y.monster_b1] != c_TNT && field[x.monster_b1 + 1][y.monster_b1] != c_store &&
+				x.monster_b1 < field_width - 3) x.monster_b1++;
 		}
 		else {
 			if (field[x.monster_b1 - 1][y.monster_b1] != c_wall && field[x.monster_b1 - 1][y.monster_b1] != c_diamond &&
-				field[x.monster_b1 - 1][y.monster_b1] != c_TNT && field[x.monster_b1 - 1][y.monster_b1] != c_store) x.monster_b1--;
+				field[x.monster_b1 - 1][y.monster_b1] != c_TNT && field[x.monster_b1 - 1][y.monster_b1] != c_store &&
+				x.monster_b1 > 2) x.monster_b1--;
 		}
 	}
 	else {
 
+		// move + or -
 		if (rand() % 100 + 1 > 50) {
 			if (field[x.monster_b1][y.monster_b1 + 1] != c_wall && field[x.monster_b1][y.monster_b1 + 1] != c_diamond &&
-				field[x.monster_b1][y.monster_b1 + 1] != c_TNT && field[x.monster_b1][y.monster_b1 + 1] != c_store) y.monster_b1++;
+				field[x.monster_b1][y.monster_b1 + 1] != c_TNT && field[x.monster_b1][y.monster_b1 + 1] != c_store &&
+				y.monster_b1 < field_hight - 3) y.monster_b1++;
 		}
 		else {
 			if (field[x.monster_b1][y.monster_b1 - 1] != c_wall && field[x.monster_b1][y.monster_b1 - 1] != c_diamond &&
-				field[x.monster_b1][y.monster_b1 - 1] != c_TNT && field[x.monster_b1][y.monster_b1 - 1] != c_store) y.monster_b1--;
+				field[x.monster_b1][y.monster_b1 - 1] != c_TNT && field[x.monster_b1][y.monster_b1 - 1] != c_store &&
+				y.monster_b1 > 2) y.monster_b1--;
 		}
 	}
 

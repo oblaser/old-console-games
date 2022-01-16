@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		05.10.2015
+// Date:		23.10.2015
 //
 // Description:	Mainfile of Diamond Miner
 // 
