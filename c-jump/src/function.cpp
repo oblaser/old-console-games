@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		23.12.2015
+// Date:		26.12.2015
 //
 // Description:	Functions for Quid
 // 
@@ -21,6 +21,9 @@ FILE * fp;
 // time handling
 clock_t t_old;
 clock_t t_new;
+
+// controller object
+XboxController * controller1;
 
 /* --- variables --- */
 
@@ -106,6 +109,47 @@ unsigned char pic_quid[5][5] = {
 };
 
 /* --- functions --- */
+
+// functions of controller class
+XboxController::XboxController(int f_playerNum) {
+	conNum = f_playerNum - 1;
+}
+
+XINPUT_STATE XboxController::getState() {
+
+	ZeroMemory(&conState, sizeof(XINPUT_STATE));
+
+	XInputGetState(conNum, &conState);
+
+	return conState;
+}
+
+bool XboxController::connected() {
+
+	ZeroMemory(&conState, sizeof(XINPUT_STATE));
+
+	DWORD f_result = XInputGetState(conNum, &conState);
+
+	if (f_result == ERROR_SUCCESS) return 1;
+	else return 0;
+}
+
+void XboxController::vibrate(int f_L_val, int f_R_val) {
+
+	XINPUT_VIBRATION vibration;
+
+	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
+
+	vibration.wLeftMotorSpeed = f_L_val;
+	vibration.wRightMotorSpeed = f_R_val;
+
+	XInputSetState(conNum, &vibration);
+}
+
+void delete_con() {
+
+	delete(controller1);
+}
 
 // cursor settings function
 unsigned int set_cursor(bool f_state, int f_size) {
@@ -353,6 +397,8 @@ unsigned int create_bar(unsigned int f_select, unsigned int f_x, unsigned int f_
 // set values to default
 unsigned int set_default() {
 
+	controller1 = new XboxController(1);
+
 	// turn off cursor
 	set_cursor(0, cursor_hight);
 
@@ -432,7 +478,7 @@ unsigned int read_HID() {
 
 		case 'star':
 			
-			if (GetAsyncKeyState(KB_start) & MSB_short) {
+			if ((GetAsyncKeyState(KB_start) & MSB_short) || (controller1->getState().Gamepad.wButtons & XI_start)) {
 				page = 'game';
 				print_en = 1;
 				last_but = but_start;
@@ -443,21 +489,27 @@ unsigned int read_HID() {
 
 		case 'game':
 
-			if ((GetAsyncKeyState(KB_move_l) & MSB_short) || (GetAsyncKeyState(KB_move_l_alt) & MSB_short)) {
+			if ((GetAsyncKeyState(KB_move_l) & MSB_short) || (GetAsyncKeyState(KB_move_l_alt) & MSB_short) ||
+				(controller1->getState().Gamepad.sThumbLX < XI_stick_th_)) {
+
 				x.quid--;
 				print_en = 1;
 				last_but = but_left;
 				tmr_wait_button = t_wait_button;
 			}
 
-			if ((GetAsyncKeyState(KB_move_r) & MSB_short) || (GetAsyncKeyState(KB_move_r_alt) & MSB_short)) {
+			if ((GetAsyncKeyState(KB_move_r) & MSB_short) || (GetAsyncKeyState(KB_move_r_alt) & MSB_short) ||
+				(controller1->getState().Gamepad.sThumbLX > XI_stick_th)) {
+
 				x.quid++;
 				print_en = 1;
 				last_but = but_right;
 				tmr_wait_button = t_wait_button;
 			}
 
-			if ((GetAsyncKeyState(KB_attack) & MSB_short) && attack_rdy) {
+			if (((GetAsyncKeyState(KB_attack) & MSB_short) || (controller1->getState().Gamepad.wButtons & XI_attack)) && 
+				attack_rdy) {
+
 				x.attack = x.quid + 2;
 				y.attack = y.quid - 1;
 				attack_rdy = 0;
@@ -835,9 +887,6 @@ unsigned int page_start() {
 		printf("%s", release_version);
 
 		print_pic_quid(24, 5);
-
-		printxy("I'm sorry! The controller", 2, 25);
-		printxy("doesn't work yet.", 2, 26);
 
 		printxy("Action  Keyboard  Controller", 2, 30);
 		printxy("move    A / D     left stick", 2, 32);

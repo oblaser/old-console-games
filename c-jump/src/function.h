@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		23.12.2015
+// Date:		26.12.2015
 //
 // Description:	Functions for Quid
 // 
@@ -32,6 +32,19 @@ public:
 	unsigned int move_bar;
 };
 
+// controller class
+class XboxController {
+private:
+	XINPUT_STATE conState;
+public:
+	int conNum;
+	XboxController(int f_playerNum);
+	XINPUT_STATE getState();
+	bool connected();
+	void vibrate(int f_L_val, int f_R_val);
+};
+
+void delete_con();
 
 /* --- std func --- */
 

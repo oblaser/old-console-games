@@ -2,7 +2,7 @@
 // 
 // Author:		Oliver Blaser
 // 
-// Date:		23.12.2015
+// Date:		26.12.2015
 //
 // Description:	Mainfile of Quid
 // 
