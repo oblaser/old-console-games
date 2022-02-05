@@ -15,6 +15,6 @@ The stores offer TNT, C4 and maps.
 
 # C Jump
 
-A [Doodle Jump](https://en.wikipedia.org/wiki/Doodle_Jump) like console game.
+A Doodle Jump like console game.
 
 ![](./c-jump/c-jump.jpg)
