@@ -1,6 +1,6 @@
 ﻿# Old Console Games
 
-> Some old (2015/2016) self-teaching C projects
+> Some old (2015/2016) autodidactive C projects
 
 
 
